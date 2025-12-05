@@ -43,12 +43,7 @@ export default function WhatsAppFloat() {
 
       {/* Selector de sucursal */}
       {showSelector && (
-        <>
-          <div
-            className="fixed inset-0 z-40 bg-black bg-opacity-50"
-            onClick={() => setShowSelector(false)}
-          />
-          <div className="fixed bottom-24 right-6 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 min-w-[250px]">
+        <div className="fixed bottom-24 right-6 z-50 bg-white dark:bg-gray-800 rounded-lg shadow-xl p-4 min-w-[250px] border border-gray-200 dark:border-gray-700">
             <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">
               Selecciona una sucursal
             </h3>
@@ -73,7 +68,6 @@ export default function WhatsAppFloat() {
               Cancelar
             </button>
           </div>
-        </>
       )}
     </>
   );
