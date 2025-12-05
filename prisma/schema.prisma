@@ -1,0 +1,286 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../node_modules/.prisma/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// Tabla de Usuarios (Administradores del sistema)
+model Usuario {
+  id              String      @id @default(uuid())
+  username        String      @unique
+  password        String      // Hash bcrypt
+  nombre          String
+  apellido        String
+  grado           String?     // Grado del personal (ej: "Suboficial", "Oficial", etc.)
+  numeroCedula    String?     @unique @map("numero_cedula")
+  numeroCredencial String?    @unique @map("numero_credencial")
+  email           String?
+  telefono        String?
+  
+  // Roles y estado
+  rol             Rol         @default(OPERADOR)
+  activo          Boolean     @default(true)
+  
+  // Timestamps
+  ultimoAcceso    DateTime?   @map("ultimo_acceso")
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("usuarios")
+}
+
+// Tabla de Clientes
+model Cliente {
+  id                String      @id @default(uuid())
+  nombreCompleto    String      @map("nombre_completo")
+  numeroCedula      String      @unique @map("numero_cedula")
+  telefono1         String      @map("telefono_1")
+  telefono2         String?     @map("telefono_2")
+  email             String      @unique
+  password          String?     // Hash bcrypt (opcional si usa Google OAuth)
+  domicilio         String?
+  ubicacionMaps     String?     @map("ubicacion_maps") // URL o coordenadas de Google Maps
+  googleId          String?     @unique @map("google_id") // Para autenticación con Google
+  activo            Boolean     @default(true)
+  
+  // Relaciones
+  carrito           CarritoItem[]
+  pedidos           Pedido[]    @relation("PedidosCliente")
+  listasRegalo      ListaRegalo[]
+  seleccionSucursal Sucursal?   @relation("ClienteSucursal", fields: [sucursalId], references: [id])
+  sucursalId        String?     @map("sucursal_id")
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("clientes")
+}
+
+// Tabla de Sucursales
+model Sucursal {
+  id              String      @id @default(uuid())
+  nombre          String      @unique
+  slug            String      @unique // Para URLs: "central" o "canindeyu"
+  descripcion     String?
+  direccion       String
+  ubicacionMaps   String      @map("ubicacion_maps") // URL de Google Maps
+  telefono        String
+  whatsapp        String      // Número de WhatsApp
+  email           String?
+  fotos           String[]    // Array de URLs de fotos
+  activa          Boolean     @default(true)
+  
+  // Relaciones
+  clientes        Cliente[]   @relation("ClienteSucursal")
+  productos       Producto[]
+  pedidos         Pedido[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("sucursales")
+}
+
+// Tabla de Categorías de Productos
+model Categoria {
+  id              String      @id @default(uuid())
+  nombre          String      @unique
+  slug            String      @unique
+  descripcion     String?
+  imagen          String?
+  activa          Boolean     @default(true)
+  
+  // Relaciones
+  productos       Producto[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("categorias")
+}
+
+// Tabla de Marcas
+model Marca {
+  id              String      @id @default(uuid())
+  nombre          String      @unique
+  slug            String      @unique
+  logo            String?     // URL del logo
+  activa          Boolean     @default(true)
+  
+  // Relaciones
+  productos       Producto[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("marcas")
+}
+
+// Tabla de Productos
+model Producto {
+  id              String      @id @default(uuid())
+  nombre          String
+  slug            String      @unique
+  descripcion     String?
+  precio          Decimal     @db.Decimal(10, 2)
+  precioOferta    Decimal?    @map("precio_oferta") @db.Decimal(10, 2)
+  ofertaDia       Boolean     @default(false) @map("oferta_dia")
+  ofertaSemana    Boolean     @default(false) @map("oferta_semana")
+  ofertaMes       Boolean     @default(false) @map("oferta_mes")
+  stock           Int         @default(0)
+  imagen          String?     // URL de imagen principal
+  imagenes        String[]    // Array de URLs de imágenes adicionales
+  activo          Boolean     @default(true)
+  
+  // Relaciones
+  categoriaId     String      @map("categoria_id")
+  categoria       Categoria   @relation(fields: [categoriaId], references: [id])
+  marcaId         String      @map("marca_id")
+  marca           Marca       @relation(fields: [marcaId], references: [id])
+  sucursalId      String?     @map("sucursal_id")
+  sucursal        Sucursal?   @relation(fields: [sucursalId], references: [id])
+  
+  // Relaciones con carrito y pedidos
+  carritoItems    CarritoItem[]
+  pedidoItems     PedidoItem[]
+  listaRegaloItems ListaRegaloItem[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("productos")
+}
+
+// Tabla de Carrito de Compras
+model CarritoItem {
+  id              String      @id @default(uuid())
+  cantidad        Int         @default(1)
+  
+  // Relaciones
+  clienteId       String      @map("cliente_id")
+  cliente         Cliente     @relation(fields: [clienteId], references: [id], onDelete: Cascade)
+  productoId      String      @map("producto_id")
+  producto        Producto    @relation(fields: [productoId], references: [id])
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@unique([clienteId, productoId])
+  @@map("carrito_items")
+}
+
+// Tabla de Pedidos
+model Pedido {
+  id              String      @id @default(uuid())
+  numeroPedido    String      @unique @map("numero_pedido")
+  estado          EstadoPedido @default(PENDIENTE)
+  metodoPago      MetodoPago  @map("metodo_pago")
+  total           Decimal     @db.Decimal(10, 2)
+  direccionEntrega String?   @map("direccion_entrega")
+  notas           String?
+  
+  // Datos de contacto para compras como invitado
+  nombreCompleto  String?     @map("nombre_completo")
+  numeroDocumento String?     @map("numero_documento")
+  email           String?
+  telefono        String?
+  
+  // Relaciones
+  clienteId       String?     @map("cliente_id")
+  cliente         Cliente?    @relation("PedidosCliente", fields: [clienteId], references: [id])
+  sucursalId      String      @map("sucursal_id")
+  sucursal        Sucursal    @relation(fields: [sucursalId], references: [id])
+  items           PedidoItem[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("pedidos")
+}
+
+// Tabla de Items de Pedido
+model PedidoItem {
+  id              String      @id @default(uuid())
+  cantidad        Int
+  precio          Decimal     @db.Decimal(10, 2)
+  
+  // Relaciones
+  pedidoId        String      @map("pedido_id")
+  pedido          Pedido      @relation(fields: [pedidoId], references: [id], onDelete: Cascade)
+  productoId      String      @map("producto_id")
+  producto        Producto    @relation(fields: [productoId], references: [id])
+  
+  @@map("pedido_items")
+}
+
+// Tabla de Listas de Regalo
+model ListaRegalo {
+  id              String      @id @default(uuid())
+  nombre          String
+  descripcion     String?
+  slug            String      @unique
+  activa          Boolean     @default(true)
+  
+  // Relaciones
+  clienteId       String      @map("cliente_id")
+  cliente         Cliente     @relation(fields: [clienteId], references: [id])
+  items           ListaRegaloItem[]
+  
+  // Timestamps
+  createdAt       DateTime    @default(now()) @map("created_at")
+  updatedAt       DateTime    @updatedAt @map("updated_at")
+
+  @@map("listas_regalo")
+}
+
+// Tabla de Items de Lista de Regalo
+model ListaRegaloItem {
+  id              String      @id @default(uuid())
+  cantidad        Int         @default(1)
+  cantidadComprada Int       @default(0) @map("cantidad_comprada")
+  
+  // Relaciones
+  listaRegaloId   String      @map("lista_regalo_id")
+  listaRegalo     ListaRegalo @relation(fields: [listaRegaloId], references: [id], onDelete: Cascade)
+  productoId      String      @map("producto_id")
+  producto        Producto    @relation(fields: [productoId], references: [id])
+  
+  @@map("lista_regalo_items")
+}
+
+// Enums
+enum Rol {
+  OPERADOR
+  SUPERVISOR_DEPARTAMENTAL
+  SUPERVISOR_REGIONAL
+  SUPERVISOR_GENERAL
+  ADMIN
+}
+
+enum EstadoPedido {
+  PENDIENTE
+  CONFIRMADO
+  EN_PREPARACION
+  EN_CAMINO
+  ENTREGADO
+  CANCELADO
+}
+
+enum MetodoPago {
+  TRANSFERENCIA_BANCARIA
+  PAGO_CONTRA_ENTREGA
+  QR_BANCARD
+}

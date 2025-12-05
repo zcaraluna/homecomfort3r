@@ -1,12 +1,26 @@
 import { Outfit } from 'next/font/google';
+import type { Metadata } from 'next';
 import './globals.css';
 
 import { SidebarProvider } from '@/context/SidebarContext';
 import { ThemeProvider } from '@/context/ThemeContext';
+import { AuthProvider } from '@/context/AuthContext';
+import { CartProvider } from '@/context/CartContext';
+import { ClienteProvider } from '@/context/ClienteContext';
+import { EnDesarrolloProvider, AvisoEnDesarrolloGlobal } from '@/components/common/EnDesarrollo';
 
 const outfit = Outfit({
   subsets: ["latin"],
 });
+
+export const metadata: Metadata = {
+  title: 'Home Comfort 3R',
+  description: 'Tu tienda de confianza para electrodomésticos en Paraguay',
+  icons: {
+    icon: '/images/logo/homecomfort3r.png',
+    apple: '/images/logo/homecomfort3r.png',
+  },
+};
 
 export default function RootLayout({
   children,
@@ -14,11 +28,20 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es">
       <body className={`${outfit.className} dark:bg-gray-900`}>
-        <ThemeProvider>
-          <SidebarProvider>{children}</SidebarProvider>
-        </ThemeProvider>
+        <AuthProvider>
+          <ThemeProvider>
+            <ClienteProvider>
+              <CartProvider>
+                <EnDesarrolloProvider>
+                  <AvisoEnDesarrolloGlobal />
+                  <SidebarProvider>{children}</SidebarProvider>
+                </EnDesarrolloProvider>
+              </CartProvider>
+            </ClienteProvider>
+          </ThemeProvider>
+        </AuthProvider>
       </body>
     </html>
   );

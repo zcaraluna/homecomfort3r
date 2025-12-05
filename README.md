@@ -1,189 +1,331 @@
-# TailAdmin Next.js - Free Next.js Tailwind Admin Dashboard Template
+# s1mple_sys - Sistema de Usuarios y Autenticación
 
-TailAdmin is a free and open-source admin dashboard template built on **Next.js and Tailwind CSS** providing developers with everything they need to create a feature-rich and data-driven: back-end, dashboard, or admin panel solution for any sort of web project.
+Plantilla base para proyectos Next.js con sistema completo de autenticación, gestión de usuarios, roles y permisos. Ideal para iniciar proyectos que requieren control de acceso y gestión de usuarios.
 
-![TailAdmin - Next.js Dashboard Preview](./banner.png)
+![Next.js Dashboard Preview](./banner.png)
 
-With TailAdmin Next.js, you get access to all the necessary dashboard UI components, elements, and pages required to build a high-quality and complete dashboard or admin panel. Whether you're building a dashboard or admin panel for a complex web application or a simple website.
+## 🎯 Características
 
-TailAdmin utilizes the powerful features of **Next.js 16** and common features of Next.js such as server-side rendering (SSR), static site generation (SSG), and seamless API route integration. Combined with the advancements of **React 19** and the robustness of **TypeScript**, TailAdmin is the perfect solution to help get your project up and running quickly.
+Esta plantilla incluye:
 
-## Overview
+* ✅ **Sistema de Autenticación Completo**
+  - Login/Logout funcional
+  - Gestión de sesiones
+  - Protección de rutas
 
-TailAdmin provides essential UI components and layouts for building feature-rich, data-driven admin dashboards and control panels. It's built on:
+* ✅ **Sistema de Roles y Permisos**
+  - OPERADOR
+  - SUPERVISOR_DEPARTAMENTAL
+  - SUPERVISOR_REGIONAL
+  - SUPERVISOR_GENERAL
+  - ADMIN
 
-* Next.js 16.x
-* React 19
-* TypeScript
-* Tailwind CSS V4
+* ✅ **Gestión de Usuarios**
+  - CRUD de usuarios
+  - Perfiles de usuario
 
-### Quick Links
+* ✅ **Base de Datos con Prisma**
+  - PostgreSQL
+  - Migraciones
+  - Seed de datos iniciales
 
-* [✨ Visit Website](https://tailadmin.com)
-* [📄 Documentation](https://tailadmin.com/docs)
-* [⬇️ Download](https://tailadmin.com/download)
-* [🖌️ Figma Design File (Community Edition)](https://www.figma.com/community/file/1463141366275764364)
-* [⚡ Get PRO Version](https://tailadmin.com/pricing)
+* ✅ **UI Moderna**
+  - Tailwind CSS V4
+  - Dark Mode
+  - Diseño responsive
+  - Componentes reutilizables
 
-### Demos
+## 🚀 Stack Tecnológico
 
-* [Free Version](https://nextjs-free-demo.tailadmin.com)
-* [Pro Version](https://nextjs-demo.tailadmin.com)
+* **Next.js 16.x** (App Router)
+* **React 19**
+* **TypeScript**
+* **Tailwind CSS V4**
+* **Prisma ORM**
+* **PostgreSQL**
+* **bcryptjs** (hashing de contraseñas)
+* **Zod** (validación de esquemas)
 
-### Other Versions
+## 📋 Prerrequisitos
 
-* [HTML Version](https://github.com/TailAdmin/tailadmin-free-tailwind-dashboard-template)
-* [React Version](https://github.com/TailAdmin/free-react-tailwind-admin-dashboard)
-* [Vue.js Version](https://github.com/TailAdmin/vue-tailwind-admin-dashboard)
+* Node.js 18.x o superior (recomendado 20.x+)
+* PostgreSQL instalado y corriendo
+* npm o yarn
 
-## Installation
+## 🔧 Instalación
 
-### Prerequisites
-
-To get started with TailAdmin, ensure you have the following prerequisites installed and set up:
-
-* Node.js 18.x or later (recommended to use Node.js 20.x or later)
-
-### Cloning the Repository
-
-Clone the repository using the following command:
+### 1. Clonar el repositorio
 
 ```bash
-git clone https://github.com/TailAdmin/free-nextjs-admin-dashboard.git
+git clone <tu-repositorio>
+cd <nombre-del-proyecto>
 ```
 
-> Windows Users: place the repository near the root of your drive if you face issues while cloning.
+### 2. Instalar dependencias
 
-1. Install dependencies:
+```bash
+npm install
+```
 
-   ```bash
-   npm install
-   # or
-   yarn install
-   ```
+> 💡 Si encuentras errores de peer dependencies, usa: `npm install --legacy-peer-deps`
 
-   > Use `--legacy-peer-deps` flag if you face peer-dependency error during installation.
+### 3. Configurar Base de Datos
 
-2. Start the development server:
+#### A. Crear base de datos en PostgreSQL
 
-   ```bash
-   npm run dev
-   # or
-   yarn dev
-   ```
+```sql
+CREATE DATABASE nombre_base_datos;
+```
 
-## Components
+#### B. Configurar variables de entorno
 
-TailAdmin is a pre-designed starting point for building a web-based dashboard using Next.js and Tailwind CSS. The template includes:
+Crea un archivo `.env` en la raíz del proyecto:
 
-* Sophisticated and accessible sidebar
-* Data visualization components
-* Profile management and custom 404 page
-* Tables and Charts(Line and Bar)
-* Authentication forms and input elements
-* Alerts, Dropdowns, Modals, Buttons and more
-* Can't forget Dark Mode 🕶️
+```env
+DATABASE_URL="postgresql://usuario:contraseña@localhost:5432/nombre_base_datos?schema=public"
+```
 
-All components are built with React and styled using Tailwind CSS for easy customization.
+**Reemplaza:**
+- `usuario`: Tu usuario de PostgreSQL (usualmente `postgres`)
+- `contraseña`: Tu contraseña de PostgreSQL
+- `localhost:5432`: Host y puerto (por defecto 5432)
+- `nombre_base_datos`: Nombre de tu base de datos
 
-## Feature Comparison
+**Ejemplo:**
+```env
+DATABASE_URL="postgresql://postgres:mi_password@localhost:5432/mi_proyecto?schema=public"
+```
 
-### Free Version
+### 4. Generar cliente de Prisma
 
-* 1 Unique Dashboard
-* 30+ dashboard components
-* 50+ UI elements
-* Basic Figma design files
-* Community support
+```bash
+npm run db:generate
+```
 
-### Pro Version
+### 5. Crear tablas en la base de datos
 
-* 7 Unique Dashboards: Analytics, Ecommerce, Marketing, CRM, SaaS, Stocks, Logistics (more coming soon)
-* 500+ dashboard components and UI elements
-* Complete Figma design file
-* Email support
+```bash
+npm run db:push
+```
 
-To learn more about pro version features and pricing, visit our [pricing page](https://tailadmin.com/pricing).
+Esto creará todas las tablas definidas en `prisma/schema.prisma`.
 
-## Changelog
+### 6. Poblar datos iniciales (Seed)
 
-### Version 2.1.0 - [November 15, 2025]
+```bash
+npm run db:seed
+```
 
-* Updated to Next.js 16.x
-* Fixed all reported minor bugs
+Esto creará:
+- Oficinas/Regionales de ejemplo
+- Departamentos de ejemplo
+- Usuarios de prueba con diferentes roles
 
-### Version 2.0.2 - [March 25, 2025]
+## 🏃 Ejecutar el Proyecto
 
-* Upgraded to Next.js 16.x for [CVE-2025-29927](https://nextjs.org/blog/cve-2025-29927) concerns
-* Included overrides vectormap for packages to prevent peer dependency errors during installation.
-* Migrated from react-flatpickr to flatpickr package for React 19 support
+### Modo desarrollo
 
-### Version 2.0.1 - [February 27, 2025]
+```bash
+npm run dev
+```
 
-#### Update Overview
+El servidor estará disponible en `http://localhost:3000`
 
-* Upgraded to Tailwind CSS v4 for better performance and efficiency.
-* Updated class usage to match the latest syntax and features.
-* Replaced deprecated class and optimized styles.
+### Ver base de datos (Opcional)
 
-#### Next Steps
+```bash
+npm run db:studio
+```
 
-* Run npm install or yarn install to update dependencies.
-* Check for any style changes or compatibility issues.
-* Refer to the Tailwind CSS v4 [Migration Guide](https://tailwindcss.com/docs/upgrade-guide) on this release. if needed.
-* This update keeps the project up to date with the latest Tailwind improvements. 🚀
+Abre Prisma Studio en tu navegador para ver y editar datos directamente.
 
-### v2.0.0 (February 2025)
+## 🔑 Usuarios de Prueba
 
-A major update focused on Next.js 16 implementation and comprehensive redesign.
+Después de ejecutar el seed, puedes usar:
 
-#### Major Improvements
+### Administrador
+- **Usuario:** `admin`
+- **Contraseña:** `admin123`
+- **Rol:** ADMIN
 
-* Complete redesign using Next.js 16 App Router and React Server Components
-* Enhanced user interface with Next.js-optimized components
-* Improved responsiveness and accessibility
-* New features including collapsible sidebar, chat screens, and calendar
-* Redesigned authentication using Next.js App Router and server actions
-* Updated data visualization using ApexCharts for React
+### Operador
+- **Usuario:** `user1`
+- **Contraseña:** `user123`
+- **Rol:** OPERADOR
 
-#### Breaking Changes
+### Supervisor Departamental
+- **Usuario:** `user2`
+- **Contraseña:** `user123`
+- **Rol:** SUPERVISOR_DEPARTAMENTAL
 
-* Migrated from Next.js 14 to Next.js 16
-* Chart components now use ApexCharts for React
-* Authentication flow updated to use Server Actions and middleware
+### Supervisor Regional
+- **Usuario:** `user3`
+- **Contraseña:** `user123`
+- **Rol:** SUPERVISOR_REGIONAL
 
-[Read more](https://tailadmin.com/docs/update-logs/nextjs) on this release.
+### Supervisor General
+- **Usuario:** `user4`
+- **Contraseña:** `user123`
+- **Rol:** SUPERVISOR_GENERAL
 
-### v1.3.4 (July 01, 2024)
+## 📁 Estructura del Proyecto
 
-* Fixed JSvectormap rendering issues
+```
+src/
+├── app/                    # Rutas de Next.js (App Router)
+│   ├── (admin)/           # Rutas protegidas
+│   │   ├── layout.tsx     # Layout con sidebar y header
+│   │   ├── page.tsx       # Dashboard principal
+│   │   └── profile/       # Página de perfil
+│   ├── (full-width-pages)/ # Rutas sin sidebar
+│   │   ├── (auth)/        # Páginas de autenticación
+│   │   ├── select-office/ # Selección de oficina
+│   │   └── select-department/ # Selección de departamento
+│   └── api/               # API Routes
+│       ├── auth/          # Endpoints de autenticación
+│       └── oficinas/      # Endpoints de oficinas
+├── components/            # Componentes React
+│   ├── auth/              # Componentes de autenticación
+│   ├── form/              # Componentes de formularios
+│   ├── header/            # Componentes del header
+│   ├── ui/                # Componentes UI básicos
+│   └── user-profile/      # Componentes de perfil
+├── context/               # Context API
+│   ├── AuthContext.tsx    # Contexto de autenticación
+│   ├── SidebarContext.tsx # Contexto del sidebar
+│   └── ThemeContext.tsx   # Contexto del tema
+├── lib/                   # Utilidades y helpers
+│   ├── auth.ts            # Funciones de autenticación
+│   ├── prisma.ts          # Cliente de Prisma
+│   └── roles.ts           # Utilidades de roles
+├── layout/                # Componentes de layout
+│   ├── AppHeader.tsx      # Header de la aplicación
+│   └── AppSidebar.tsx     # Sidebar de navegación
+└── types/                 # Tipos TypeScript
+    └── auth.ts            # Tipos de autenticación
+```
 
-### v1.3.3 (June 20, 2024)
+## 🛠️ Comandos Útiles
 
-* Fixed build error related to Loader component
+```bash
+# Generar cliente Prisma
+npm run db:generate
 
-### v1.3.2 (June 19, 2024)
+# Aplicar cambios al esquema
+npm run db:push
 
-* Added ClickOutside component for dropdown menus
-* Refactored sidebar components
-* Updated Jsvectormap package
+# Crear migración (para producción)
+npm run db:migrate
 
-### v1.3.1 (Feb 12, 2024)
+# Poblar datos iniciales
+npm run db:seed
 
-* Fixed layout naming consistency
-* Updated styles
+# Abrir Prisma Studio
+npm run db:studio
 
-### v1.3.0 (Feb 05, 2024)
+# Desarrollo
+npm run dev
 
-* Upgraded to Next.js 14
-* Added Flatpickr integration
-* Improved form elements
-* Enhanced multiselect functionality
-* Added default layout component
+# Build producción
+npm run build
 
-## License
+# Iniciar producción
+npm run start
 
-TailAdmin Next.js Free Version is released under the MIT License.
+# Linter
+npm run lint
+```
 
-## Support
-If you find this project helpful, please consider giving it a star on GitHub. Your support helps us continue developing and maintaining this template.
+## 🔒 Seguridad
+
+### ⚠️ Notas Importantes
+
+Esta plantilla usa **localStorage** para las sesiones, lo cual es adecuado para desarrollo pero **NO es recomendado para producción**.
+
+### Recomendaciones para Producción
+
+1. **Migrar a JWT + Cookies httpOnly**
+   - Implementar tokens JWT
+   - Almacenar en cookies httpOnly
+   - Validar en middleware del servidor
+
+2. **Implementar Rate Limiting**
+   - Limitar intentos de login
+   - Proteger endpoints sensibles
+
+3. **Validar Permisos en API**
+   - Middleware de autenticación
+   - Validación de roles y permisos
+
+4. **HTTPS Obligatorio**
+   - Usar HTTPS en producción
+   - Configurar CORS correctamente
+
+## 📝 Personalización
+
+### Cambiar el nombre de la aplicación
+
+1. Actualiza el nombre en `src/layout/AppSidebar.tsx` (línea 276)
+2. Actualiza el título en `src/app/layout.tsx`
+
+### Agregar nuevos roles
+
+1. Edita `prisma/schema.prisma` (enum Rol)
+2. Ejecuta `npm run db:push`
+3. Actualiza `src/lib/roles.ts`
+
+### Modificar el esquema de base de datos
+
+1. Edita `prisma/schema.prisma`
+2. Ejecuta `npm run db:push` (desarrollo) o `npm run db:migrate` (producción)
+
+## ❓ Solución de Problemas
+
+### Error: "Can't reach database server"
+- Verifica que PostgreSQL esté corriendo
+- Revisa la URL en `.env`
+- Verifica usuario y contraseña
+
+### Error: "database does not exist"
+- Crea la base de datos manualmente: `CREATE DATABASE nombre_db;`
+
+### Error: "relation already exists"
+- Usa `npm run db:push -- --force-reset` para resetear (⚠️ elimina todos los datos)
+
+### Error de build: "Module not found: Can't resolve '.prisma/client'"
+- Ejecuta `npm run db:generate`
+
+## 📚 Documentación Adicional
+
+- [ARQUITECTURA.md](./ARQUITECTURA.md) - Arquitectura del sistema
+- [SETUP.md](./SETUP.md) - Guía de configuración detallada
+- [MIGRACION_ROLES.md](./MIGRACION_ROLES.md) - Guía de migración de roles
+
+## 📚 Recursos
+
+- [Prisma Docs](https://www.prisma.io/docs)
+- [Next.js Docs](https://nextjs.org/docs)
+- [Tailwind CSS Docs](https://tailwindcss.com/docs)
+- [PostgreSQL Docs](https://www.postgresql.org/docs/)
+
+## 📄 Licencia
+
+Este proyecto está basado en TailAdmin Next.js y está bajo la licencia MIT.
+
+## 🤝 Contribuir
+
+Las contribuciones son bienvenidas. Por favor:
+
+1. Fork el proyecto
+2. Crea una rama para tu feature (`git checkout -b feature/AmazingFeature`)
+3. Commit tus cambios (`git commit -m 'Add some AmazingFeature'`)
+4. Push a la rama (`git push origin feature/AmazingFeature`)
+5. Abre un Pull Request
+
+## 📧 Soporte
+
+Si encuentras algún problema o tienes preguntas, por favor abre un issue en el repositorio.
+
+---
+
+**¡Feliz desarrollo! 🚀**
