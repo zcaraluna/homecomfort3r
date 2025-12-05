@@ -2,8 +2,8 @@ module.exports = {
   apps: [
     {
       name: 'homecomfort3r',
-      script: 'npm',
-      args: 'start',
+      script: 'node_modules/.bin/next',
+      args: 'start -p 3333',
       cwd: './',
       instances: 1,
       autorestart: true,

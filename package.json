@@ -4,7 +4,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "cross-env NODE_OPTIONS=--no-warnings next build",
+    "postinstall": "prisma generate",
+    "build": "prisma generate && cross-env NODE_OPTIONS=--no-warnings next build",
     "start": "next start -p 3333",
     "start:pm2": "pm2 start ecosystem.config.js",
     "stop:pm2": "pm2 stop homecomfort3r",
