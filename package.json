@@ -51,11 +51,11 @@
     "react-dropzone": "^14.3.8",
     "swiper": "^11.2.10",
     "tailwind-merge": "^2.6.0",
-    "zod": "^4.1.13"
+    "zod": "^4.1.13",
+    "@svgr/webpack": "^8.1.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",
-    "@svgr/webpack": "^8.1.0",
     "@types/node": "^20.19.25",
     "@types/pg": "^8.15.6",
     "@types/react": "^19.2.4",
