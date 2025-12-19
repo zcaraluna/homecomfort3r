@@ -8,6 +8,9 @@ import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
 
+// Forzar renderizado dinámico para evitar problemas con localStorage durante el build
+export const dynamic = 'force-dynamic';
+
 type MetodoPago = 'TRANSFERENCIA_BANCARIA' | 'PAGO_CONTRA_ENTREGA' | 'QR_BANCARD';
 
 export default function CheckoutPage() {
