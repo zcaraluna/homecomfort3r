@@ -8,9 +8,6 @@ import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
 
-// Forzar renderizado dinámico para evitar problemas con localStorage durante el build
-export const dynamic = 'force-dynamic';
-
 type MetodoPago = 'TRANSFERENCIA_BANCARIA' | 'PAGO_CONTRA_ENTREGA' | 'QR_BANCARD';
 
 export default function CheckoutPage() {
@@ -27,9 +24,11 @@ export default function CheckoutPage() {
   const [telefono, setTelefono] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [mounted, setMounted] = useState(false);
 
-  // Si está autenticado, prellenar datos del cliente
+  // Asegurar que solo se ejecute en el cliente
   useEffect(() => {
+    setMounted(true);
     if (isAuthenticated && cliente) {
       setNombreCompleto(cliente.nombreCompleto || '');
       setEmail(cliente.email || '');
@@ -51,8 +50,10 @@ export default function CheckoutPage() {
     setLoading(true);
 
     try {
-      // Obtener sucursal seleccionada
-      const sucursalSeleccionada = localStorage.getItem('sucursal_seleccionada') || 'central';
+      // Obtener sucursal seleccionada (solo en el cliente)
+      const sucursalSeleccionada = typeof window !== 'undefined' 
+        ? localStorage.getItem('sucursal_seleccionada') || 'central'
+        : 'central';
 
       // Validar datos de contacto si es compra como invitado
       if (!isAuthenticated) {
@@ -68,8 +69,8 @@ export default function CheckoutPage() {
         'Content-Type': 'application/json',
       };
 
-      // Agregar clienteId solo si está autenticado
-      if (isAuthenticated) {
+      // Agregar clienteId solo si está autenticado (solo en el cliente)
+      if (isAuthenticated && typeof window !== 'undefined') {
         const clienteSession = localStorage.getItem('cliente_session');
         if (clienteSession) {
           const clienteData = JSON.parse(clienteSession);
@@ -119,6 +120,11 @@ export default function CheckoutPage() {
       setLoading(false);
     }
   };
+
+  // No renderizar hasta que esté montado en el cliente
+  if (!mounted) {
+    return null;
+  }
 
   if (items.length === 0) {
     router.push('/carrito');
