@@ -13,7 +13,7 @@ export default function PublicFooter() {
 
   return (
     <footer className="bg-gray-900 dark:bg-black text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-12 pb-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-10">
           {/* Información de la empresa */}
           <div className="lg:col-span-2">
@@ -97,29 +97,19 @@ export default function PublicFooter() {
         </div>
 
         {/* Copyright */}
-        <div className="border-t border-gray-800 pt-8">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4 text-sm">
-            <p className="text-gray-400">
-              &copy; {currentYear} HomeComfort3R. Todos los derechos reservados.
-            </p>
-            <div className="flex gap-6">
+        <div className="border-t border-gray-800 pt-2">
+          <div className="text-center text-sm text-gray-400">
+            <p>
+              &copy; {currentYear} HomeComfort3R. Todos los derechos reservados. | Powered by{' '}
               <a 
                 href="https://s1mple.cloud" 
                 target="_blank" 
                 rel="noopener noreferrer"
-                className="text-[#00ff00] hover:text-[#00cc00] transition-colors font-medium"
+                className="text-brand-400 hover:text-brand-300 transition-colors font-medium"
               >
                 s1mple
               </a>
-              <a 
-                href="https://bitcan.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-[#ff6600] hover:text-[#cc5500] transition-colors font-medium"
-              >
-                Bitcan
-              </a>
-            </div>
+            </p>
           </div>
         </div>
       </div>

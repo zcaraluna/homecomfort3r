@@ -1,4 +1,4 @@
-import { Outfit } from 'next/font/google';
+import { Inter } from 'next/font/google';
 import type { Metadata } from 'next';
 import './globals.css';
 
@@ -9,8 +9,9 @@ import { CartProvider } from '@/context/CartContext';
 import { ClienteProvider } from '@/context/ClienteContext';
 import { EnDesarrolloProvider, AvisoEnDesarrolloGlobal } from '@/components/common/EnDesarrollo';
 
-const outfit = Outfit({
+const inter = Inter({
   subsets: ["latin"],
+  display: 'swap',
 });
 
 export const metadata: Metadata = {
@@ -29,7 +30,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="es">
-      <body className={`${outfit.className} dark:bg-gray-900`}>
+      <body className={`${inter.className} dark:bg-gray-900`}>
         <AuthProvider>
           <ThemeProvider>
             <ClienteProvider>
