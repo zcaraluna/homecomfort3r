@@ -98,7 +98,7 @@ export async function POST(request: NextRequest) {
       password: string;
       nombre: string;
       apellido: string;
-      rol: string;
+      rol: Rol;
       grado: string | null;
       numeroCedula: string | null;
       numeroCredencial: string | null;
