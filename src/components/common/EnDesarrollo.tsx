@@ -34,7 +34,7 @@ export function useEnDesarrollo() {
   return context;
 }
 
-export function AvisoEnDesarrollo({ mostrar, onClose }: { mostrar: boolean; onClose: () => void }) {
+export function AvisoEnDesarrollo({ mostrar }: { mostrar: boolean; onClose?: () => void }) {
   if (!mostrar) return null;
 
   return (

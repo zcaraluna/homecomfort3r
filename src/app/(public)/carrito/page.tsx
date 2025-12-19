@@ -399,8 +399,9 @@ export default function CarritoPage() {
                         // Limpiar carrito y redirigir
                         clearCart();
                         router.push(`/lista-regalos/${data.lista.slug}`);
-                      } catch (err: any) {
-                        setError(err.message || 'Error al crear la lista');
+                      } catch (err: unknown) {
+                        const errorMessage = err instanceof Error ? err.message : 'Error al crear la lista';
+                        setError(errorMessage);
                       } finally {
                         setLoading(false);
                       }

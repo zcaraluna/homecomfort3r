@@ -4,12 +4,11 @@ import React from 'react';
 import Link from 'next/link';
 import { useEnDesarrollo } from './EnDesarrollo';
 
-interface EnlaceDesarrolloProps {
+interface EnlaceDesarrolloProps extends React.AnchorHTMLAttributes<HTMLAnchorElement> {
   href: string;
   children: React.ReactNode;
   className?: string;
   onClick?: () => void;
-  [key: string]: any;
 }
 
 export default function EnlaceDesarrollo({ href, children, className, onClick, ...props }: EnlaceDesarrolloProps) {

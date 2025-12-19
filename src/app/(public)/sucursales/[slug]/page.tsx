@@ -4,7 +4,17 @@ import React from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
 
-const SUCURSALES: Record<string, any> = {
+interface Sucursal {
+  nombre: string;
+  direccion: string;
+  telefono: string;
+  whatsapp: string;
+  email: string;
+  ubicacionMaps: string;
+  descripcion: string;
+}
+
+const SUCURSALES: Record<string, Sucursal> = {
   central: {
     nombre: 'Sucursal Dpto. Central',
     direccion: 'Rojas Cañada, Capiatá',

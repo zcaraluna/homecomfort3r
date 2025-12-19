@@ -12,7 +12,22 @@ export default function ListaRegalosPage() {
   const router = useRouter();
   const slug = params.slug as string;
   const { addToCart } = useCart();
-  const [lista, setLista] = useState<any>(null);
+  const [lista, setLista] = useState<{
+    nombre: string;
+    descripcion?: string;
+    items?: Array<{
+      id: string;
+      cantidad: number;
+      cantidadComprada: number;
+      producto: {
+        id: string;
+        nombre: string;
+        precio: string | number;
+        precioOferta?: string | number | null;
+        imagen?: string | null;
+      };
+    }>;
+  } | null>(null);
   const [loading, setLoading] = useState(true);
   const [showToast, setShowToast] = useState(false);
   const [toastProduct, setToastProduct] = useState<string>('');
@@ -75,7 +90,7 @@ export default function ListaRegalosPage() {
         )}
 
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {lista.items?.map((item: any) => {
+          {lista.items?.map((item) => {
             const cantidadRestante = item.cantidad - item.cantidadComprada;
             const producto = item.producto;
             const precio = producto.precioOferta ? Number(producto.precioOferta) : Number(producto.precio);

@@ -37,8 +37,9 @@ export default function IniciarSesionPage() {
       } else {
         setError('Email o contraseña incorrectos');
       }
-    } catch (err: any) {
-      setError(err.message || 'Error al iniciar sesión. Por favor, intente nuevamente.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al iniciar sesión. Por favor, intente nuevamente.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

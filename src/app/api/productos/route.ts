@@ -9,7 +9,12 @@ export async function GET(request: NextRequest) {
     const busqueda = searchParams.get('busqueda');
     const orden = searchParams.get('orden'); // 'asc' | 'desc'
 
-    const where: any = {
+    const where: {
+      activo: boolean;
+      categoria?: { slug: string };
+      marca?: { slug: string };
+      nombre?: { contains: string; mode: 'insensitive' };
+    } = {
       activo: true,
     };
 

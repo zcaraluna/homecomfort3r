@@ -109,9 +109,10 @@ export default function CheckoutPage() {
       // Limpiar carrito y redirigir
       clearCart();
       router.push(`/pedido-exitoso?pedido=${data.pedido.numeroPedido}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('Error en checkout:', err);
-      setError(err.message || 'Error al procesar el pedido. Por favor, intente nuevamente.');
+      const errorMessage = err instanceof Error ? err.message : 'Error al procesar el pedido. Por favor, intente nuevamente.';
+      setError(errorMessage);
       setLoading(false);
     }
   };

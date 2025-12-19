@@ -61,8 +61,9 @@ export default function CrearListaRegalosPage() {
 
       setSuccess(true);
       setListaSlug(data.lista.slug);
-    } catch (err: any) {
-      setError(err.message || 'Error al crear la lista. Por favor, intente nuevamente.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear la lista. Por favor, intente nuevamente.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

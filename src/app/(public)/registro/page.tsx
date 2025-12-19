@@ -66,8 +66,9 @@ export default function RegistroPage() {
         domicilio: '',
         ubicacionMaps: '',
       });
-    } catch (err: any) {
-      setError(err.message || 'Error al registrar. Por favor, intente nuevamente.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al registrar. Por favor, intente nuevamente.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

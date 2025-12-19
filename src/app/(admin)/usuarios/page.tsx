@@ -107,8 +107,9 @@ export default function CrearUsuarioPage() {
       setTimeout(() => {
         setSuccess(false);
       }, 3000);
-    } catch (err: any) {
-      setError(err.message || 'Error al crear el usuario. Por favor, intente nuevamente.');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Error al crear el usuario. Por favor, intente nuevamente.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }
