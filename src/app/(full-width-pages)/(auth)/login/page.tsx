@@ -30,11 +30,10 @@ export default function LoginPage() {
       if (successLogin) {
         setIsLoading(false);
         setSuccess(true);
-        // Mostrar mensaje de éxito y luego redirigir
-        setTimeout(() => {
-          router.push('/administracion');
-          router.refresh();
-        }, 2000);
+        // Esperar un momento para que el contexto se actualice, luego redirigir
+        await new Promise(resolve => setTimeout(resolve, 1500));
+        // Usar window.location para forzar navegación completa y evitar problemas con ProtectedRoute
+        window.location.href = '/administracion';
       } else {
         setIsLoading(false);
         setError('Usuario o contraseña incorrectos');
