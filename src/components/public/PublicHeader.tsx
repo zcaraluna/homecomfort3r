@@ -69,18 +69,18 @@ export default function PublicHeader() {
               </>
             ) : (
               <>
-                <EnlaceDesarrollo
+                <Link
                   href="/registro"
                   className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium"
                 >
                   Registrarse
-                </EnlaceDesarrollo>
-                <EnlaceDesarrollo
+                </Link>
+                <Link
                   href="/iniciar-sesion"
                   className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
                 >
                   Iniciar Sesión
-                </EnlaceDesarrollo>
+                </Link>
               </>
             )}
           </nav>
@@ -144,20 +144,20 @@ export default function PublicHeader() {
                 </>
               ) : (
                 <>
-                  <EnlaceDesarrollo
+                  <Link
                     href="/registro"
                     onClick={() => setIsMenuOpen(false)}
                     className="px-4 py-2 bg-brand-600 text-white rounded-lg hover:bg-brand-700 transition-colors text-sm font-medium text-center"
                   >
                     Registrarse
-                  </EnlaceDesarrollo>
-                  <EnlaceDesarrollo
+                  </Link>
+                  <Link
                     href="/iniciar-sesion"
                     onClick={() => setIsMenuOpen(false)}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-center"
                   >
                     Iniciar Sesión
-                  </EnlaceDesarrollo>
+                  </Link>
                 </>
               )}
             </nav>
