@@ -4,7 +4,7 @@ import { z } from 'zod';
 import bcrypt from 'bcryptjs';
 
 const loginSchema = z.object({
-  email: z.string().email('Email inválido'),
+  email: z.string().min(1, 'Usuario o correo electrónico requerido'),
   password: z.string().min(1, 'La contraseña es requerida'),
 });
 
@@ -25,50 +25,67 @@ export async function POST(request: NextRequest) {
 
     const { email, password } = validationResult.data;
 
-    // Buscar cliente por email
-    const cliente = await prisma.cliente.findUnique({
-      where: { email },
+    // Si contiene @, intentar buscar como cliente por email
+    if (email.includes('@')) {
+      const cliente = await prisma.cliente.findUnique({
+        where: { email },
+      });
+
+      if (cliente && cliente.activo) {
+        // Verificar contraseña si existe
+        if (cliente.password) {
+          const isPasswordValid = await bcrypt.compare(password, cliente.password);
+          if (isPasswordValid) {
+            return NextResponse.json(
+              {
+                success: true,
+                cliente: {
+                  id: cliente.id,
+                  nombreCompleto: cliente.nombreCompleto,
+                  email: cliente.email,
+                  numeroCedula: cliente.numeroCedula,
+                  telefono1: cliente.telefono1,
+                },
+              },
+              { status: 200 }
+            );
+          }
+        }
+      }
+    }
+
+    // Si no es email o no se encontró como cliente, intentar buscar como usuario por username
+    const usuario = await prisma.usuario.findUnique({
+      where: { username: email },
     });
 
-    if (!cliente || !cliente.activo) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: 'Email o contraseña incorrectos',
-        },
-        { status: 401 }
-      );
-    }
-
-    // Verificar contraseña si existe
-    if (cliente.password) {
-      const isPasswordValid = await bcrypt.compare(password, cliente.password);
-      if (!isPasswordValid) {
+    if (usuario && usuario.activo) {
+      const isPasswordValid = await bcrypt.compare(password, usuario.password);
+      if (isPasswordValid) {
+        // Retornar como cliente (convertir usuario a formato cliente)
         return NextResponse.json(
           {
-            success: false,
-            error: 'Email o contraseña incorrectos',
+            success: true,
+            cliente: {
+              id: usuario.id,
+              nombreCompleto: `${usuario.nombre} ${usuario.apellido}`,
+              email: usuario.email || '',
+              numeroCedula: usuario.numeroCedula || '',
+              telefono1: usuario.telefono || '',
+            },
           },
-          { status: 401 }
+          { status: 200 }
         );
       }
-    } else {
-      // Si no tiene contraseña, solo verificar que el email exista
-      // (para clientes registrados con Google OAuth)
     }
 
+    // Si no se encontró ni como cliente ni como usuario
     return NextResponse.json(
       {
-        success: true,
-        cliente: {
-          id: cliente.id,
-          nombreCompleto: cliente.nombreCompleto,
-          email: cliente.email,
-          numeroCedula: cliente.numeroCedula,
-          telefono1: cliente.telefono1,
-        },
+        success: false,
+        error: 'Usuario o contraseña incorrectos',
       },
-      { status: 200 }
+      { status: 401 }
     );
   } catch (error) {
     console.error('Error en login de cliente:', error);

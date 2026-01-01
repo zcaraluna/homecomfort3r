@@ -64,14 +64,14 @@ export default function IniciarSesionPage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <Label htmlFor="email">Correo Electrónico</Label>
+              <Label htmlFor="email">Usuario o Correo Electrónico</Label>
               <Input
-                type="email"
+                type="text"
                 id="email"
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="usuario@ejemplo.com"
+                placeholder="usuario o usuario@ejemplo.com"
                 required
               />
             </div>
