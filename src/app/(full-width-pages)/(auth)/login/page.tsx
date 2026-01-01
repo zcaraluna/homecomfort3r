@@ -28,18 +28,20 @@ export default function LoginPage() {
       const successLogin = await login(username, password);
       
       if (successLogin) {
+        setIsLoading(false);
         setSuccess(true);
         // Mostrar mensaje de éxito y luego redirigir
         setTimeout(() => {
           router.push('/administracion');
-        }, 1500);
+          router.refresh();
+        }, 2000);
       } else {
+        setIsLoading(false);
         setError('Usuario o contraseña incorrectos');
       }
     } catch (err) {
-      setError('Error al iniciar sesión. Por favor, intente nuevamente.');
-    } finally {
       setIsLoading(false);
+      setError('Error al iniciar sesión. Por favor, intente nuevamente.');
     }
   };
 
