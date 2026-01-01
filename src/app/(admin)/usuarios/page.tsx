@@ -35,7 +35,7 @@ export default function CrearUsuarioPage() {
 
   useEffect(() => {
     if (!authLoading && !isAuthenticated) {
-      router.push('/signin');
+      router.push('/login');
       return;
     }
 
