@@ -1,12 +1,11 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
 import { EyeCloseIcon, EyeIcon } from '@/icons';
 import { useAuth } from '@/context/AuthContext';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -16,7 +15,19 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { login } = useAuth();
-  const router = useRouter();
+
+  // Efecto para manejar la redirección cuando el login es exitoso
+  useEffect(() => {
+    if (success) {
+      const timer = setTimeout(() => {
+        // Usar window.location para forzar navegación completa y evitar problemas con ProtectedRoute
+        window.location.href = '/administracion';
+      }, 1500);
+
+      // Limpiar el timer si el componente se desmonta
+      return () => clearTimeout(timer);
+    }
+  }, [success]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -30,10 +41,6 @@ export default function LoginPage() {
       if (successLogin) {
         setIsLoading(false);
         setSuccess(true);
-        // Esperar un momento para que el contexto se actualice, luego redirigir
-        await new Promise(resolve => setTimeout(resolve, 1500));
-        // Usar window.location para forzar navegación completa y evitar problemas con ProtectedRoute
-        window.location.href = '/administracion';
       } else {
         setIsLoading(false);
         setError('Usuario o contraseña incorrectos');
@@ -65,8 +72,13 @@ export default function LoginPage() {
                   </div>
                 )}
                 {success && (
-                  <div className="p-3 text-sm text-green-600 bg-green-50 border border-green-200 rounded-lg dark:bg-green-900/20 dark:text-green-400 dark:border-green-800">
-                    ¡Éxito! Redirigiendo...
+                  <div className="p-4 text-sm font-medium text-green-700 bg-green-50 border-2 border-green-300 rounded-lg dark:bg-green-900/30 dark:text-green-300 dark:border-green-600 animate-pulse">
+                    <div className="flex items-center gap-2">
+                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                        <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                      </svg>
+                      <span>¡Login exitoso! Redirigiendo a administración...</span>
+                    </div>
                   </div>
                 )}
                 <div>
