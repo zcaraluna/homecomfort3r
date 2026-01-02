@@ -18,14 +18,35 @@ export default function LoginPage() {
 
   // Efecto para manejar la redirección cuando el login es exitoso
   useEffect(() => {
+    console.log('useEffect ejecutado, success:', success);
     if (success) {
+      console.log('Success es true, verificando sesión guardada...');
+      
+      // Verificar que la sesión esté guardada en localStorage
+      const checkSession = () => {
+        const sessionData = localStorage.getItem('user_session');
+        console.log('Sesión en localStorage:', sessionData ? 'existe' : 'no existe');
+        return !!sessionData;
+      };
+
+      // Esperar un momento para que el contexto se actualice y la sesión se guarde
       const timer = setTimeout(() => {
-        // Usar window.location para forzar navegación completa y evitar problemas con ProtectedRoute
-        window.location.href = '/administracion';
+        if (checkSession()) {
+          console.log('Sesión verificada, redirigiendo a /administracion');
+          // Usar window.location para forzar navegación completa y evitar problemas con ProtectedRoute
+          window.location.href = '/administracion';
+        } else {
+          console.error('Sesión no encontrada después del login');
+          setError('Error al guardar la sesión. Por favor, intente nuevamente.');
+          setSuccess(false);
+        }
       }, 1500);
 
       // Limpiar el timer si el componente se desmonta
-      return () => clearTimeout(timer);
+      return () => {
+        console.log('Limpiando timer');
+        clearTimeout(timer);
+      };
     }
   }, [success]);
 
@@ -36,16 +57,22 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
+      console.log('Intentando login con:', username);
       const successLogin = await login(username, password);
+      console.log('Resultado del login:', successLogin);
       
       if (successLogin) {
+        console.log('Login exitoso, estableciendo success a true');
         setIsLoading(false);
         setSuccess(true);
+        console.log('Success establecido a true');
       } else {
+        console.log('Login fallido');
         setIsLoading(false);
         setError('Usuario o contraseña incorrectos');
       }
     } catch (err) {
+      console.error('Error en handleSubmit:', err);
       setIsLoading(false);
       setError('Error al iniciar sesión. Por favor, intente nuevamente.');
     }
