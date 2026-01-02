@@ -76,7 +76,7 @@ export default function PublicHeader() {
                   Registrarse
                 </Link>
                 <Link
-                  href="/iniciar-sesion"
+                  href="/login"
                   className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium"
                 >
                   Iniciar Sesión
@@ -152,7 +152,7 @@ export default function PublicHeader() {
                     Registrarse
                   </Link>
                   <Link
-                    href="/iniciar-sesion"
+                    href="/login"
                     onClick={() => setIsMenuOpen(false)}
                     className="px-4 py-2 border border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors text-sm font-medium text-center"
                   >

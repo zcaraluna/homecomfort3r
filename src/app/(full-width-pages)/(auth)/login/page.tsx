@@ -6,6 +6,7 @@ import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
 import { EyeCloseIcon, EyeIcon } from '@/icons';
 import { useAuth } from '@/context/AuthContext';
+import { useCliente } from '@/context/ClienteContext';
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
@@ -14,20 +15,26 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const { login } = useAuth();
+  const [userType, setUserType] = useState<'admin' | 'cliente' | null>(null);
+  const { login: loginAdmin } = useAuth();
+  const { login: loginCliente } = useCliente();
   const redirectTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Efecto para manejar la redirección cuando success es true
   useEffect(() => {
-    if (success) {
+    if (success && userType) {
       // Limpiar timer anterior si existe
       if (redirectTimerRef.current) {
         clearTimeout(redirectTimerRef.current);
       }
       
-      // Redirigir después de 1.5 segundos
+      // Redirigir según el tipo de usuario
       redirectTimerRef.current = setTimeout(() => {
-        window.location.href = '/administracion';
+        if (userType === 'admin') {
+          window.location.href = '/administracion';
+        } else {
+          window.location.href = '/';
+        }
       }, 1500);
     }
     
@@ -37,7 +44,7 @@ export default function LoginPage() {
         clearTimeout(redirectTimerRef.current);
       }
     };
-  }, [success]);
+  }, [success, userType]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -50,33 +57,77 @@ export default function LoginPage() {
 
     setError('');
     setSuccess(false);
+    setUserType(null);
     setIsLoading(true);
 
     try {
-      const successLogin = await login(username, password);
-      
-      if (successLogin) {
-        // Esperar un momento para asegurar que localStorage se actualizó
-        await new Promise(resolve => setTimeout(resolve, 200));
-        
-        // Verificar que la sesión se guardó
-        const sessionData = localStorage.getItem('user_session');
-        if (sessionData) {
-          // Establecer estados
-          setIsLoading(false);
-          // Forzar actualización del estado success
-          setSuccess(true);
+      // Llamar al endpoint unificado
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ username, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.success) {
+        if (data.type === 'admin' && data.user) {
+          // Es usuario administrativo
+          const successLogin = await loginAdmin(username, password);
+          if (successLogin) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const sessionData = localStorage.getItem('user_session');
+            if (sessionData) {
+              setIsLoading(false);
+              setSuccess(true);
+              setUserType('admin');
+            } else {
+              setIsLoading(false);
+              setError('Error al guardar la sesión. Por favor, intente nuevamente.');
+            }
+          } else {
+            setIsLoading(false);
+            setError('Error al iniciar sesión. Por favor, intente nuevamente.');
+          }
+        } else if (data.type === 'cliente' && data.cliente) {
+          // Es cliente
+          const successLogin = await loginCliente(username, password);
+          if (successLogin) {
+            await new Promise(resolve => setTimeout(resolve, 200));
+            const sessionData = localStorage.getItem('cliente_session');
+            if (sessionData) {
+              setIsLoading(false);
+              setSuccess(true);
+              setUserType('cliente');
+            } else {
+              setIsLoading(false);
+              setError('Error al guardar la sesión. Por favor, intente nuevamente.');
+            }
+          } else {
+            setIsLoading(false);
+            setError('Error al iniciar sesión. Por favor, intente nuevamente.');
+          }
         } else {
           setIsLoading(false);
-          setError('Error al guardar la sesión. Por favor, intente nuevamente.');
+          setError('Error al procesar el login. Por favor, intente nuevamente.');
         }
       } else {
         setIsLoading(false);
-        setError('Usuario o contraseña incorrectos');
+        setError(data.error || 'Usuario o contraseña incorrectos');
       }
     } catch (err) {
       setIsLoading(false);
       setError('Error al iniciar sesión. Por favor, intente nuevamente.');
+    }
+  };
+
+  const getSuccessMessage = () => {
+    if (userType === 'admin') {
+      return '¡Login exitoso! Redirigiendo a administración...';
+    } else {
+      return '¡Login exitoso! Redirigiendo...';
     }
   };
 
@@ -89,7 +140,7 @@ export default function LoginPage() {
               Iniciar Sesión
             </h1>
             <p className="text-sm text-gray-500 dark:text-gray-400">
-              Ingrese su usuario y contraseña para iniciar sesión
+              Ingrese su usuario/email y contraseña para iniciar sesión
             </p>
           </div>
           <div>
@@ -106,16 +157,16 @@ export default function LoginPage() {
                       <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
-                      <span className="font-bold">¡Login exitoso! Redirigiendo a administración en 1.5 segundos...</span>
+                      <span className="font-bold">{getSuccessMessage()}</span>
                     </div>
                   </div>
                 )}
                 <div>
                   <Label>
-                    Usuario <span className="text-error-500">*</span>
+                    Usuario o Email <span className="text-error-500">*</span>
                   </Label>
                   <Input
-                    placeholder="Ingrese su usuario"
+                    placeholder="Ingrese su usuario o email"
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}

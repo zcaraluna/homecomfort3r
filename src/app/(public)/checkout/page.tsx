@@ -174,7 +174,7 @@ export default function CheckoutPage() {
               </h2>
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
                 Completa tus datos para procesar el pedido. Puedes{' '}
-                <a href="/iniciar-sesion" className="text-brand-600 dark:text-brand-400 hover:underline">
+                <a href="/login" className="text-brand-600 dark:text-brand-400 hover:underline">
                   iniciar sesión
                 </a>{' '}
                 o{' '}

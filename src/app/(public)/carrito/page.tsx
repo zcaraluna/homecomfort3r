@@ -280,7 +280,7 @@ export default function CarritoPage() {
                     <button
                       onClick={() => {
                         if (!isAuthenticated) {
-                          router.push('/iniciar-sesion?redirect=/carrito');
+                          router.push('/login?redirect=/carrito');
                           return;
                         }
                         setShowCreateListModal(true);
