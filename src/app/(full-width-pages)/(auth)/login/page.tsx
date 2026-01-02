@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
@@ -16,39 +16,6 @@ export default function LoginPage() {
   const [success, setSuccess] = useState(false);
   const { login } = useAuth();
 
-  // Efecto para manejar la redirección cuando el login es exitoso
-  useEffect(() => {
-    console.log('useEffect ejecutado, success:', success);
-    if (success) {
-      console.log('Success es true, verificando sesión guardada...');
-      
-      // Verificar que la sesión esté guardada en localStorage
-      const checkSession = () => {
-        const sessionData = localStorage.getItem('user_session');
-        console.log('Sesión en localStorage:', sessionData ? 'existe' : 'no existe');
-        return !!sessionData;
-      };
-
-      // Esperar un momento para que el contexto se actualice y la sesión se guarde
-      const timer = setTimeout(() => {
-        if (checkSession()) {
-          console.log('Sesión verificada, redirigiendo a /administracion');
-          // Usar window.location para forzar navegación completa y evitar problemas con ProtectedRoute
-          window.location.href = '/administracion';
-        } else {
-          console.error('Sesión no encontrada después del login');
-          setError('Error al guardar la sesión. Por favor, intente nuevamente.');
-          setSuccess(false);
-        }
-      }, 1500);
-
-      // Limpiar el timer si el componente se desmonta
-      return () => {
-        console.log('Limpiando timer');
-        clearTimeout(timer);
-      };
-    }
-  }, [success]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,22 +24,31 @@ export default function LoginPage() {
     setIsLoading(true);
 
     try {
-      console.log('Intentando login con:', username);
       const successLogin = await login(username, password);
-      console.log('Resultado del login:', successLogin);
       
       if (successLogin) {
-        console.log('Login exitoso, estableciendo success a true');
-        setIsLoading(false);
-        setSuccess(true);
-        console.log('Success establecido a true');
+        // Esperar un momento para que el contexto se actualice
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
+        // Verificar que la sesión se guardó
+        const sessionData = localStorage.getItem('user_session');
+        if (sessionData) {
+          setIsLoading(false);
+          setSuccess(true);
+          
+          // Esperar 1.5 segundos mostrando el mensaje de éxito, luego redirigir
+          setTimeout(() => {
+            window.location.href = '/administracion';
+          }, 1500);
+        } else {
+          setIsLoading(false);
+          setError('Error al guardar la sesión. Por favor, intente nuevamente.');
+        }
       } else {
-        console.log('Login fallido');
         setIsLoading(false);
         setError('Usuario o contraseña incorrectos');
       }
     } catch (err) {
-      console.error('Error en handleSubmit:', err);
       setIsLoading(false);
       setError('Error al iniciar sesión. Por favor, intente nuevamente.');
     }
@@ -99,9 +75,9 @@ export default function LoginPage() {
                   </div>
                 )}
                 {success && (
-                  <div className="p-4 text-sm font-medium text-green-700 bg-green-50 border-2 border-green-300 rounded-lg dark:bg-green-900/30 dark:text-green-300 dark:border-green-600 animate-pulse">
+                  <div className="p-4 text-sm font-medium text-green-700 bg-green-50 border-2 border-green-300 rounded-lg dark:bg-green-900/30 dark:text-green-300 dark:border-green-600">
                     <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
                       <span>¡Login exitoso! Redirigiendo a administración...</span>
