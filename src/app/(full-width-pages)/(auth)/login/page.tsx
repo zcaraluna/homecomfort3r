@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Input from '@/components/form/input/InputField';
 import Label from '@/components/form/Label';
 import Button from '@/components/ui/button/Button';
@@ -15,6 +15,29 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const { login } = useAuth();
+  const redirectTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Efecto para manejar la redirección cuando success es true
+  useEffect(() => {
+    if (success) {
+      // Limpiar timer anterior si existe
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
+      
+      // Redirigir después de 1.5 segundos
+      redirectTimerRef.current = setTimeout(() => {
+        window.location.href = '/administracion';
+      }, 1500);
+    }
+    
+    // Limpiar timer al desmontar
+    return () => {
+      if (redirectTimerRef.current) {
+        clearTimeout(redirectTimerRef.current);
+      }
+    };
+  }, [success]);
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -33,16 +56,16 @@ export default function LoginPage() {
       const successLogin = await login(username, password);
       
       if (successLogin) {
-        // Verificar inmediatamente que la sesión se guardó
+        // Esperar un momento para asegurar que localStorage se actualizó
+        await new Promise(resolve => setTimeout(resolve, 200));
+        
+        // Verificar que la sesión se guardó
         const sessionData = localStorage.getItem('user_session');
         if (sessionData) {
+          // Establecer estados
           setIsLoading(false);
+          // Forzar actualización del estado success
           setSuccess(true);
-          
-          // Mostrar mensaje de éxito y redirigir después de 1.5 segundos
-          setTimeout(() => {
-            window.location.href = '/administracion';
-          }, 1500);
         } else {
           setIsLoading(false);
           setError('Error al guardar la sesión. Por favor, intente nuevamente.');
@@ -78,12 +101,12 @@ export default function LoginPage() {
                   </div>
                 )}
                 {success && (
-                  <div className="p-4 text-sm font-medium text-green-700 bg-green-50 border-2 border-green-300 rounded-lg dark:bg-green-900/30 dark:text-green-300 dark:border-green-600">
-                    <div className="flex items-center gap-2">
-                      <svg className="w-5 h-5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                  <div className="p-4 text-base font-semibold text-green-800 bg-green-100 border-2 border-green-400 rounded-lg dark:bg-green-900/40 dark:text-green-200 dark:border-green-500 shadow-lg animate-pulse">
+                    <div className="flex items-center gap-3">
+                      <svg className="w-6 h-6 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
                         <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                       </svg>
-                      <span>¡Login exitoso! Redirigiendo a administración...</span>
+                      <span className="font-bold">¡Login exitoso! Redirigiendo a administración en 1.5 segundos...</span>
                     </div>
                   </div>
                 )}
