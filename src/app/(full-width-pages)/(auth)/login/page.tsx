@@ -16,9 +16,15 @@ export default function LoginPage() {
   const [success, setSuccess] = useState(false);
   const { login } = useAuth();
 
-
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    e.stopPropagation();
+    
+    if (!username.trim() || !password.trim()) {
+      setError('Por favor, complete todos los campos');
+      return;
+    }
+
     setError('');
     setSuccess(false);
     setIsLoading(true);
@@ -27,16 +33,13 @@ export default function LoginPage() {
       const successLogin = await login(username, password);
       
       if (successLogin) {
-        // Esperar un momento para que el contexto se actualice
-        await new Promise(resolve => setTimeout(resolve, 100));
-        
-        // Verificar que la sesión se guardó
+        // Verificar inmediatamente que la sesión se guardó
         const sessionData = localStorage.getItem('user_session');
         if (sessionData) {
           setIsLoading(false);
           setSuccess(true);
           
-          // Esperar 1.5 segundos mostrando el mensaje de éxito, luego redirigir
+          // Mostrar mensaje de éxito y redirigir después de 1.5 segundos
           setTimeout(() => {
             window.location.href = '/administracion';
           }, 1500);
@@ -67,7 +70,7 @@ export default function LoginPage() {
             </p>
           </div>
           <div>
-            <form onSubmit={handleSubmit}>
+            <form onSubmit={handleSubmit} noValidate>
               <div className="space-y-6">
                 {error && (
                   <div className="p-3 text-sm text-red-600 bg-red-50 border border-red-200 rounded-lg dark:bg-red-900/20 dark:text-red-400 dark:border-red-800">
@@ -86,7 +89,7 @@ export default function LoginPage() {
                 )}
                 <div>
                   <Label>
-                    Usuario <span className="text-error-500">*</span>{' '}
+                    Usuario <span className="text-error-500">*</span>
                   </Label>
                   <Input
                     placeholder="Ingrese su usuario"
@@ -95,11 +98,12 @@ export default function LoginPage() {
                     onChange={(e) => setUsername(e.target.value)}
                     required
                     disabled={isLoading || success}
+                    autoComplete="username"
                   />
                 </div>
                 <div>
                   <Label>
-                    Contraseña <span className="text-error-500">*</span>{' '}
+                    Contraseña <span className="text-error-500">*</span>
                   </Label>
                   <div className="relative">
                     <Input
@@ -109,6 +113,7 @@ export default function LoginPage() {
                       onChange={(e) => setPassword(e.target.value)}
                       required
                       disabled={isLoading || success}
+                      autoComplete="current-password"
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -123,7 +128,12 @@ export default function LoginPage() {
                   </div>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm" type="submit" disabled={isLoading || success}>
+                  <Button 
+                    className="w-full" 
+                    size="sm" 
+                    type="submit" 
+                    disabled={isLoading || success}
+                  >
                     {isLoading ? 'Iniciando sesión...' : success ? '¡Éxito!' : 'Iniciar Sesión'}
                   </Button>
                 </div>
