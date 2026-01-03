@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { ChevronLeftIcon, PlusIcon, TrashBinIcon } from '@/icons';
+import { ChevronLeftIcon, PlusIcon, TrashBinIcon, CloseIcon } from '@/icons';
 import SearchSelect from '@/components/admin/SearchSelect';
 import CurrencyInput from '@/components/admin/CurrencyInput';
 
@@ -776,13 +776,35 @@ export default function NuevaVentaPage() {
 
       {/* Modal para crear nuevo cliente */}
       {mostrarModalCliente && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+        <div className="fixed inset-0 z-50 overflow-y-auto">
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+            onClick={() => {
+              setMostrarModalCliente(false);
+              setNuevoCliente({
+                nombreCompleto: '',
+                numeroCedula: '',
+                ruc: '',
+                telefono1: '',
+                telefono2: '',
+                email: '',
+                domicilio: '',
+              });
+            }}
+          />
+
+          {/* Modal */}
+          <div className="flex min-h-full items-center justify-center p-4">
+            <div
+              className="relative w-full max-w-2xl bg-white dark:bg-gray-900 rounded-2xl shadow-xl transform transition-all"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Header */}
+              <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-800">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                   Nuevo Cliente
-                </h2>
+                </h3>
                 <button
                   type="button"
                   onClick={() => {
@@ -797,126 +819,140 @@ export default function NuevaVentaPage() {
                       domicilio: '',
                     });
                   }}
-                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                  className="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-lg transition-colors"
                 >
-                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
+                  <CloseIcon className="w-5 h-5" />
                 </button>
               </div>
 
-              <div className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Nombre Completo *
-                  </label>
-                  <input
-                    type="text"
-                    value={nuevoCliente.nombreCompleto}
-                    onChange={(e) =>
-                      setNuevoCliente({ ...nuevoCliente, nombreCompleto: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                    placeholder="Ej: Juan Pérez"
-                  />
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {/* Content */}
+              <div className="p-6 max-h-[calc(100vh-200px)] overflow-y-auto">
+                <div className="space-y-6">
+                  {/* Nombre Completo */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Cédula / RUC *
+                      Nombre Completo <span className="text-red-500">*</span>
                     </label>
                     <input
                       type="text"
-                      value={nuevoCliente.numeroCedula}
+                      value={nuevoCliente.nombreCompleto}
                       onChange={(e) =>
-                        setNuevoCliente({ ...nuevoCliente, numeroCedula: e.target.value })
+                        setNuevoCliente({ ...nuevoCliente, nombreCompleto: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                      placeholder="Ej: 1234567"
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors font-outfit"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                      placeholder="Ej: Juan Pérez"
                     />
                   </div>
 
+                  {/* Cédula y RUC */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Cédula / RUC <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={nuevoCliente.numeroCedula}
+                        onChange={(e) =>
+                          setNuevoCliente({ ...nuevoCliente, numeroCedula: e.target.value })
+                        }
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors font-outfit"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                        placeholder="Ej: 1234567"
+                      />
+                    </div>
+
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        RUC <span className="text-gray-400 text-xs">(opcional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={nuevoCliente.ruc}
+                        onChange={(e) =>
+                          setNuevoCliente({ ...nuevoCliente, ruc: e.target.value })
+                        }
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors font-outfit"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                        placeholder="Ej: 80012345-1"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Email */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      RUC (opcional)
+                      Email <span className="text-red-500">*</span>
                     </label>
                     <input
-                      type="text"
-                      value={nuevoCliente.ruc}
+                      type="email"
+                      value={nuevoCliente.email}
                       onChange={(e) =>
-                        setNuevoCliente({ ...nuevoCliente, ruc: e.target.value })
+                        setNuevoCliente({ ...nuevoCliente, email: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                      placeholder="Ej: 80012345-1"
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors font-outfit"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                      placeholder="Ej: juan@example.com"
                     />
                   </div>
-                </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Email *
-                  </label>
-                  <input
-                    type="email"
-                    value={nuevoCliente.email}
-                    onChange={(e) =>
-                      setNuevoCliente({ ...nuevoCliente, email: e.target.value })
-                    }
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                    placeholder="Ej: juan@example.com"
-                  />
-                </div>
+                  {/* Teléfonos */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Teléfono 1 <span className="text-red-500">*</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={nuevoCliente.telefono1}
+                        onChange={(e) =>
+                          setNuevoCliente({ ...nuevoCliente, telefono1: e.target.value })
+                        }
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors font-outfit"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                        placeholder="Ej: 0981 123 456"
+                      />
+                    </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                        Teléfono 2 <span className="text-gray-400 text-xs">(opcional)</span>
+                      </label>
+                      <input
+                        type="text"
+                        value={nuevoCliente.telefono2}
+                        onChange={(e) =>
+                          setNuevoCliente({ ...nuevoCliente, telefono2: e.target.value })
+                        }
+                        className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors font-outfit"
+                        style={{ fontFamily: 'Inter, sans-serif' }}
+                        placeholder="Ej: 0982 654 321"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Domicilio */}
                   <div>
                     <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Teléfono 1 *
+                      Domicilio <span className="text-gray-400 text-xs">(opcional)</span>
                     </label>
-                    <input
-                      type="text"
-                      value={nuevoCliente.telefono1}
+                    <textarea
+                      value={nuevoCliente.domicilio}
                       onChange={(e) =>
-                        setNuevoCliente({ ...nuevoCliente, telefono1: e.target.value })
+                        setNuevoCliente({ ...nuevoCliente, domicilio: e.target.value })
                       }
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                      placeholder="Ej: 0981 123 456"
+                      rows={3}
+                      className="w-full px-4 py-2.5 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-brand-500 focus:border-transparent transition-colors resize-none font-outfit"
+                      style={{ fontFamily: 'Inter, sans-serif' }}
+                      placeholder="Ej: Av. Principal 123, Asunción"
                     />
                   </div>
-
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                      Teléfono 2 (opcional)
-                    </label>
-                    <input
-                      type="text"
-                      value={nuevoCliente.telefono2}
-                      onChange={(e) =>
-                        setNuevoCliente({ ...nuevoCliente, telefono2: e.target.value })
-                      }
-                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                      placeholder="Ej: 0982 654 321"
-                    />
-                  </div>
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Domicilio (opcional)
-                  </label>
-                  <textarea
-                    value={nuevoCliente.domicilio}
-                    onChange={(e) =>
-                      setNuevoCliente({ ...nuevoCliente, domicilio: e.target.value })
-                    }
-                    rows={3}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
-                    placeholder="Ej: Av. Principal 123, Asunción"
-                  />
                 </div>
               </div>
 
-              <div className="flex gap-4 mt-6">
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200 dark:border-gray-800">
                 <button
                   type="button"
                   onClick={() => {
@@ -931,7 +967,7 @@ export default function NuevaVentaPage() {
                       domicilio: '',
                     });
                   }}
-                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                  className="px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors font-medium"
                 >
                   Cancelar
                 </button>
@@ -939,7 +975,7 @@ export default function NuevaVentaPage() {
                   type="button"
                   onClick={crearCliente}
                   disabled={creandoCliente}
-                  className="flex-1 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium"
                 >
                   {creandoCliente ? 'Creando...' : 'Crear Cliente'}
                 </button>
