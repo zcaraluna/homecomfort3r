@@ -49,6 +49,17 @@ export default function NuevaVentaPage() {
   const [buscandoProducto, setBuscandoProducto] = useState(false);
   const [busquedaProducto, setBusquedaProducto] = useState('');
   const [productosFiltrados, setProductosFiltrados] = useState<Producto[]>([]);
+  const [mostrarModalCliente, setMostrarModalCliente] = useState(false);
+  const [nuevoCliente, setNuevoCliente] = useState({
+    nombreCompleto: '',
+    numeroCedula: '',
+    ruc: '',
+    telefono1: '',
+    telefono2: '',
+    email: '',
+    domicilio: '',
+  });
+  const [creandoCliente, setCreandoCliente] = useState(false);
 
   useEffect(() => {
     fetchClientes();
@@ -81,6 +92,57 @@ export default function NuevaVentaPage() {
       }
     } catch (error) {
       console.error('Error fetching clientes:', error);
+    }
+  };
+
+  const crearCliente = async () => {
+    if (!nuevoCliente.nombreCompleto || !nuevoCliente.numeroCedula || !nuevoCliente.telefono1 || !nuevoCliente.email) {
+      alert('Por favor completa los campos requeridos: Nombre, Cédula, Teléfono y Email');
+      return;
+    }
+
+    setCreandoCliente(true);
+    try {
+      const response = await fetch('/api/clientes', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nombreCompleto: nuevoCliente.nombreCompleto,
+          numeroCedula: nuevoCliente.numeroCedula,
+          ruc: nuevoCliente.ruc || null,
+          telefono1: nuevoCliente.telefono1,
+          telefono2: nuevoCliente.telefono2 || null,
+          email: nuevoCliente.email,
+          domicilio: nuevoCliente.domicilio || null,
+          activo: true,
+        }),
+      });
+
+      const result = await response.json();
+      if (result.success) {
+        // Actualizar lista de clientes
+        await fetchClientes();
+        // Seleccionar el nuevo cliente
+        setClienteSeleccionado(result.data.id);
+        // Cerrar modal y limpiar formulario
+        setMostrarModalCliente(false);
+        setNuevoCliente({
+          nombreCompleto: '',
+          numeroCedula: '',
+          ruc: '',
+          telefono1: '',
+          telefono2: '',
+          email: '',
+          domicilio: '',
+        });
+      } else {
+        alert(result.error || 'Error al crear el cliente');
+      }
+    } catch (error) {
+      console.error('Error creating cliente:', error);
+      alert('Error al crear el cliente');
+    } finally {
+      setCreandoCliente(false);
     }
   };
 
@@ -331,9 +393,18 @@ export default function NuevaVentaPage() {
               </h2>
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                    Cliente *
-                  </label>
+                  <div className="flex items-center justify-between mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                      Cliente *
+                    </label>
+                    <button
+                      type="button"
+                      onClick={() => setMostrarModalCliente(true)}
+                      className="text-sm text-brand-600 dark:text-brand-400 hover:text-brand-700 dark:hover:text-brand-300 font-medium"
+                    >
+                      + Nuevo Cliente
+                    </button>
+                  </div>
                   <SearchSelect
                     options={clientes}
                     value={clienteSeleccionado}
@@ -701,6 +772,181 @@ export default function NuevaVentaPage() {
           </div>
         </div>
       </form>
+
+      {/* Modal para crear nuevo cliente */}
+      {mostrarModalCliente && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <div className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white">
+                  Nuevo Cliente
+                </h2>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMostrarModalCliente(false);
+                    setNuevoCliente({
+                      nombreCompleto: '',
+                      numeroCedula: '',
+                      ruc: '',
+                      telefono1: '',
+                      telefono2: '',
+                      email: '',
+                      domicilio: '',
+                    });
+                  }}
+                  className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                >
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Nombre Completo *
+                  </label>
+                  <input
+                    type="text"
+                    value={nuevoCliente.nombreCompleto}
+                    onChange={(e) =>
+                      setNuevoCliente({ ...nuevoCliente, nombreCompleto: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    placeholder="Ej: Juan Pérez"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Cédula / RUC *
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevoCliente.numeroCedula}
+                      onChange={(e) =>
+                        setNuevoCliente({ ...nuevoCliente, numeroCedula: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      placeholder="Ej: 1234567"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      RUC (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevoCliente.ruc}
+                      onChange={(e) =>
+                        setNuevoCliente({ ...nuevoCliente, ruc: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      placeholder="Ej: 80012345-1"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Email *
+                  </label>
+                  <input
+                    type="email"
+                    value={nuevoCliente.email}
+                    onChange={(e) =>
+                      setNuevoCliente({ ...nuevoCliente, email: e.target.value })
+                    }
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    placeholder="Ej: juan@example.com"
+                  />
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Teléfono 1 *
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevoCliente.telefono1}
+                      onChange={(e) =>
+                        setNuevoCliente({ ...nuevoCliente, telefono1: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      placeholder="Ej: 0981 123 456"
+                    />
+                  </div>
+
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                      Teléfono 2 (opcional)
+                    </label>
+                    <input
+                      type="text"
+                      value={nuevoCliente.telefono2}
+                      onChange={(e) =>
+                        setNuevoCliente({ ...nuevoCliente, telefono2: e.target.value })
+                      }
+                      className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      placeholder="Ej: 0982 654 321"
+                    />
+                  </div>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Domicilio (opcional)
+                  </label>
+                  <textarea
+                    value={nuevoCliente.domicilio}
+                    onChange={(e) =>
+                      setNuevoCliente({ ...nuevoCliente, domicilio: e.target.value })
+                    }
+                    rows={3}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-900 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    placeholder="Ej: Av. Principal 123, Asunción"
+                  />
+                </div>
+              </div>
+
+              <div className="flex gap-4 mt-6">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMostrarModalCliente(false);
+                    setNuevoCliente({
+                      nombreCompleto: '',
+                      numeroCedula: '',
+                      ruc: '',
+                      telefono1: '',
+                      telefono2: '',
+                      email: '',
+                      domicilio: '',
+                    });
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="button"
+                  onClick={crearCliente}
+                  disabled={creandoCliente}
+                  className="flex-1 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {creandoCliente ? 'Creando...' : 'Crear Cliente'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
