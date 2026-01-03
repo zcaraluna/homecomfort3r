@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useMemo } from 'react';
-import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, EyeIcon, TrashBinIcon } from '@/icons';
+import { ChevronLeftIcon, ChevronRightIcon, PencilIcon, EyeIcon, TrashBinIcon, ChevronDownIcon, ChevronUpIcon } from '@/icons';
 
 export interface Column<T> {
   header: string;
@@ -22,6 +22,8 @@ interface DataTableProps<T> {
   pageSize?: number;
   className?: string;
   emptyMessage?: string;
+  expandable?: boolean;
+  renderExpandedContent?: (row: T) => React.ReactNode;
 }
 
 export default function DataTable<T extends { id: string }>({
@@ -36,13 +38,28 @@ export default function DataTable<T extends { id: string }>({
   pageSize = 10,
   className = '',
   emptyMessage = 'No hay datos disponibles',
+  expandable = false,
+  renderExpandedContent,
 }: DataTableProps<T>) {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
+  const [expandedRows, setExpandedRows] = useState<Set<string>>(new Set());
   const [sortConfig, setSortConfig] = useState<{ key: keyof T | null; direction: 'asc' | 'desc' }>({
     key: null,
     direction: 'asc',
   });
+
+  const toggleRow = (id: string) => {
+    setExpandedRows((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(id)) {
+        newSet.delete(id);
+      } else {
+        newSet.add(id);
+      }
+      return newSet;
+    });
+  };
 
   // Filtrar datos
   const filteredData = useMemo(() => {
@@ -130,6 +147,10 @@ export default function DataTable<T extends { id: string }>({
         <table className="w-full">
           <thead className="bg-gray-50 dark:bg-gray-800/50">
             <tr>
+              {expandable && (
+                <th className="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider w-12">
+                </th>
+              )}
               {columns.map((col, index) => (
                 <th
                   key={index}
@@ -166,12 +187,28 @@ export default function DataTable<T extends { id: string }>({
                 </td>
               </tr>
             ) : (
-              paginatedData.map((row) => (
-                <tr
-                  key={row.id}
-                  className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
-                >
-                  {columns.map((col, index) => {
+              paginatedData.map((row) => {
+                const isExpanded = expandedRows.has(row.id);
+                return (
+                  <React.Fragment key={row.id}>
+                    <tr
+                      className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
+                    >
+                      {expandable && (
+                        <td className="px-4 py-4">
+                          <button
+                            onClick={() => toggleRow(row.id)}
+                            className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                          >
+                            {isExpanded ? (
+                              <ChevronUpIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                            ) : (
+                              <ChevronDownIcon className="w-4 h-4 text-gray-600 dark:text-gray-400" />
+                            )}
+                          </button>
+                        </td>
+                      )}
+                      {columns.map((col, index) => {
                     const cellClassName = typeof col.className === 'function' 
                       ? col.className(row) 
                       : col.className || '';
@@ -217,8 +254,17 @@ export default function DataTable<T extends { id: string }>({
                       </div>
                     </td>
                   )}
-                </tr>
-              ))
+                    </tr>
+                    {expandable && isExpanded && renderExpandedContent && (
+                      <tr>
+                        <td colSpan={columns.length + (onEdit || onView || onDelete ? 1 : 0) + (expandable ? 1 : 0)} className="px-6 py-4 bg-gray-50 dark:bg-gray-800/30">
+                          {renderExpandedContent(row)}
+                        </td>
+                      </tr>
+                    )}
+                  </React.Fragment>
+                );
+              })
             )}
           </tbody>
         </table>

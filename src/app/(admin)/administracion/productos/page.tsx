@@ -142,6 +142,14 @@ export default function ProductosPage() {
     }
   };
 
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-PY', {
+      style: 'currency',
+      currency: 'PYG',
+      minimumFractionDigits: 0,
+    }).format(value);
+  };
+
   const columns: Column<Producto>[] = [
     {
       header: 'Código',
@@ -153,16 +161,8 @@ export default function ProductosPage() {
       sortable: true,
     },
     {
-      header: 'Categoría',
-      accessor: (row) => row.categoria.nombre,
-    },
-    {
-      header: 'Marca',
-      accessor: (row) => row.marca.nombre,
-    },
-    {
       header: 'Precio',
-      accessor: (row) => `₲ ${row.precio.toLocaleString('es-PY')}`,
+      accessor: (row) => formatCurrency(row.precio),
     },
     {
       header: 'Stock',
@@ -170,16 +170,63 @@ export default function ProductosPage() {
       sortable: true,
       className: (row: Producto) => row.stock < 10 ? 'text-red-600 dark:text-red-400 font-semibold' : '',
     },
-    {
-      header: 'Estado',
-      accessor: (row) => (
+  ];
+
+  const renderExpandedContent = (row: Producto) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Código de Barras</p>
+        <p className="text-gray-900 dark:text-white">{row.codigoBarras || '-'}</p>
+      </div>
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Categoría</p>
+        <p className="text-gray-900 dark:text-white">{row.categoria.nombre}</p>
+      </div>
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Marca</p>
+        <p className="text-gray-900 dark:text-white">{row.marca.nombre}</p>
+      </div>
+      {row.precioOferta && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Precio Oferta</p>
+          <p className="text-gray-900 dark:text-white font-semibold text-green-600 dark:text-green-400">
+            {formatCurrency(row.precioOferta)}
+          </p>
+        </div>
+      )}
+      {row.rubro && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Rubro</p>
+          <p className="text-gray-900 dark:text-white">{row.rubro}</p>
+        </div>
+      )}
+      {row.familia && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Familia</p>
+          <p className="text-gray-900 dark:text-white">{row.familia}</p>
+        </div>
+      )}
+      {row.descripcion && (
+        <div className="md:col-span-2 lg:col-span-3">
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Descripción</p>
+          <p className="text-gray-900 dark:text-white">{row.descripcion}</p>
+        </div>
+      )}
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Estado</p>
         <StatusBadge
           status={row.activo ? 'Activo' : 'Inactivo'}
           variant={row.activo ? 'success' : 'default'}
         />
-      ),
-    },
-  ];
+      </div>
+      {row.stockNegativo && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Stock Negativo</p>
+          <StatusBadge status="Permitido" variant="warning" />
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -215,6 +262,8 @@ export default function ProductosPage() {
           onEdit={handleEdit}
           onView={handleView}
           onDelete={handleDelete}
+          expandable={true}
+          renderExpandedContent={renderExpandedContent}
           searchable={true}
           searchPlaceholder="Buscar por nombre, código o código de barras..."
           pagination={true}

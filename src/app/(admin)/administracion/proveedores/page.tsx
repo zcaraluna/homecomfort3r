@@ -14,6 +14,7 @@ interface Proveedor {
   ruc: string;
   telefono: string | null;
   correo: string | null;
+  direccion?: string | null;
   activo: boolean;
 }
 
@@ -115,28 +116,41 @@ export default function ProveedoresPage() {
       header: 'Nombre Comercial',
       accessor: 'nombreComercial',
     },
-    {
-      header: 'RUC',
-      accessor: 'ruc',
-    },
-    {
-      header: 'Teléfono',
-      accessor: (row) => row.telefono || '-',
-    },
-    {
-      header: 'Email',
-      accessor: (row) => row.correo || '-',
-    },
-    {
-      header: 'Estado',
-      accessor: (row) => (
+  ];
+
+  const renderExpandedContent = (row: Proveedor) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">RUC</p>
+        <p className="text-gray-900 dark:text-white">{row.ruc}</p>
+      </div>
+      {row.telefono && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Teléfono</p>
+          <p className="text-gray-900 dark:text-white">{row.telefono}</p>
+        </div>
+      )}
+      {row.correo && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Email</p>
+          <p className="text-gray-900 dark:text-white">{row.correo}</p>
+        </div>
+      )}
+      {row.direccion && (
+        <div className="md:col-span-2 lg:col-span-3">
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Dirección</p>
+          <p className="text-gray-900 dark:text-white">{row.direccion}</p>
+        </div>
+      )}
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Estado</p>
         <StatusBadge
           status={row.activo ? 'Activo' : 'Inactivo'}
           variant={row.activo ? 'success' : 'default'}
         />
-      ),
-    },
-  ];
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -171,6 +185,8 @@ export default function ProveedoresPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          expandable={true}
+          renderExpandedContent={renderExpandedContent}
           searchable={true}
           searchPlaceholder="Buscar por nombre, RUC..."
           pagination={true}
@@ -207,7 +223,7 @@ function ProveedorFormModal({
     nombreComercial: proveedor?.nombreComercial || '',
     ruc: proveedor?.ruc || '',
     ci: '',
-    direccion: '',
+    direccion: proveedor?.direccion || '',
     correo: proveedor?.correo || '',
     web: '',
     telefono: proveedor?.telefono || '',
@@ -358,4 +374,3 @@ function ProveedorFormModal({
     </FormModal>
   );
 }
-

@@ -13,10 +13,12 @@ interface Cliente {
   numeroCedula: string;
   email: string;
   telefono1: string;
+  telefono2?: string | null;
   ruc: string | null;
   codigoCliente: number | null;
   activo: boolean;
   listaPrecio: { nombre: string; id: string } | null;
+  domicilio?: string | null;
 }
 
 export default function ClientesPage() {
@@ -152,31 +154,48 @@ export default function ClientesPage() {
       ),
     },
     {
-      header: 'Cédula/RUC',
+      header: 'RUC/C.I.',
       accessor: (row) => row.ruc || row.numeroCedula,
     },
-    {
-      header: 'Email',
-      accessor: 'email',
-    },
-    {
-      header: 'Teléfono',
-      accessor: 'telefono1',
-    },
-    {
-      header: 'Lista Precio',
-      accessor: (row) => row.listaPrecio?.nombre || '-',
-    },
-    {
-      header: 'Estado',
-      accessor: (row) => (
+  ];
+
+  const renderExpandedContent = (row: Cliente) => (
+    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Email</p>
+        <p className="text-gray-900 dark:text-white">{row.email}</p>
+      </div>
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Teléfono 1</p>
+        <p className="text-gray-900 dark:text-white">{row.telefono1}</p>
+      </div>
+      {row.telefono2 && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Teléfono 2</p>
+          <p className="text-gray-900 dark:text-white">{row.telefono2}</p>
+        </div>
+      )}
+      {row.domicilio && (
+        <div className="md:col-span-2 lg:col-span-3">
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Domicilio</p>
+          <p className="text-gray-900 dark:text-white">{row.domicilio}</p>
+        </div>
+      )}
+      {row.listaPrecio && (
+        <div>
+          <p className="text-gray-600 dark:text-gray-400 font-medium">Lista de Precio</p>
+          <p className="text-gray-900 dark:text-white">{row.listaPrecio.nombre}</p>
+        </div>
+      )}
+      <div>
+        <p className="text-gray-600 dark:text-gray-400 font-medium">Estado</p>
         <StatusBadge
           status={row.activo ? 'Activo' : 'Inactivo'}
           variant={row.activo ? 'success' : 'default'}
         />
-      ),
-    },
-  ];
+      </div>
+    </div>
+  );
 
   return (
     <div className="space-y-6">
@@ -226,6 +245,8 @@ export default function ClientesPage() {
           columns={columns}
           onEdit={handleEdit}
           onDelete={handleDelete}
+          expandable={true}
+          renderExpandedContent={renderExpandedContent}
           searchable={true}
           searchPlaceholder="Buscar por nombre, cédula, email..."
           pagination={true}
@@ -264,8 +285,8 @@ function ClienteFormModal({
     numeroCedula: cliente?.numeroCedula.replace(/^TEMP_/, '') || '',
     email: cliente?.email.replace(/cliente_temp_\d+@migrado\.local/, '') || '',
     telefono1: cliente?.telefono1 || '',
-    telefono2: '',
-    domicilio: '',
+    telefono2: cliente?.telefono2 || '',
+    domicilio: cliente?.domicilio || '',
     nombreComercial: '',
     ruc: cliente?.ruc || '',
     listaPrecioId: cliente?.listaPrecio?.id || '',
@@ -429,4 +450,3 @@ function ClienteFormModal({
     </FormModal>
   );
 }
-
