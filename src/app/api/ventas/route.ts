@@ -12,6 +12,7 @@ const ventaItemSchema = z.object({
 
 const crearVentaSchema = z.object({
   clienteId: z.string().uuid(),
+  numeroFactura: z.string().min(1, 'El número de factura es requerido'),
   tipoDocumento: z.string().optional(),
   condicion: z.string().optional(),
   fecha: z.string(),
@@ -133,22 +134,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generar número de factura (formato: 001-001-0000001)
-    // Por ahora usaremos un formato simple, puedes mejorarlo después
-    const ultimaVenta = await prisma.venta.findFirst({
-      orderBy: { createdAt: 'desc' },
-      select: { numeroFactura: true },
-    });
-
-    let numeroFactura = '001-001-0000001';
-    if (ultimaVenta) {
-      const partes = ultimaVenta.numeroFactura.split('-');
-      if (partes.length === 3) {
-        const ultimoNumero = parseInt(partes[2]) || 0;
-        const nuevoNumero = String(ultimoNumero + 1).padStart(7, '0');
-        numeroFactura = `${partes[0]}-${partes[1]}-${nuevoNumero}`;
-      }
-    }
+    // Usar el número de factura proporcionado
+    const numeroFactura = data.numeroFactura.trim();
 
     // Verificar que no existe ya una venta con este número
     const ventaExistente = await prisma.venta.findUnique({
@@ -156,11 +143,13 @@ export async function POST(request: NextRequest) {
     });
 
     if (ventaExistente) {
-      // Si existe, incrementar el número
-      const partes = numeroFactura.split('-');
-      const ultimoNumero = parseInt(partes[2]) || 0;
-      const nuevoNumero = String(ultimoNumero + 1).padStart(7, '0');
-      numeroFactura = `${partes[0]}-${partes[1]}-${nuevoNumero}`;
+      return NextResponse.json(
+        {
+          success: false,
+          error: `Ya existe una venta con el número de factura ${numeroFactura}. Por favor usa otro número.`,
+        },
+        { status: 400 }
+      );
     }
 
     // Verificar stock de productos antes de crear la venta

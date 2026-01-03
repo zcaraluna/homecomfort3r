@@ -43,6 +43,7 @@ export default function NuevaVentaPage() {
   const [tipoVenta, setTipoVenta] = useState<'contado' | 'cuotas'>('contado');
   const [numeroCuotas, setNumeroCuotas] = useState<number>(12);
   const [porcentajeRecargoPorCuota, setPorcentajeRecargoPorCuota] = useState<number>(2);
+  const [numeroFactura, setNumeroFactura] = useState<string>('');
   const [timbrado, setTimbrado] = useState<string>('');
   const [timbradoVencimiento, setTimbradoVencimiento] = useState<string>('');
   const [fechaVencimiento, setFechaVencimiento] = useState<string>('');
@@ -65,7 +66,31 @@ export default function NuevaVentaPage() {
   useEffect(() => {
     fetchClientes();
     fetchProductos();
+    generarNumeroFactura();
   }, []);
+
+  const generarNumeroFactura = async () => {
+    try {
+      const response = await fetch('/api/ventas?limit=1');
+      const result = await response.json();
+      if (result.success && result.data.length > 0) {
+        const ultimaVenta = result.data[0];
+        const partes = ultimaVenta.numeroFactura.split('-');
+        if (partes.length === 3) {
+          const ultimoNumero = parseInt(partes[2]) || 0;
+          const nuevoNumero = String(ultimoNumero + 1).padStart(7, '0');
+          setNumeroFactura(`${partes[0]}-${partes[1]}-${nuevoNumero}`);
+        } else {
+          setNumeroFactura('001-001-0000001');
+        }
+      } else {
+        setNumeroFactura('001-001-0000001');
+      }
+    } catch (error) {
+      console.error('Error generando número de factura:', error);
+      setNumeroFactura('001-001-0000001');
+    }
+  };
 
   useEffect(() => {
     if (busquedaProducto.length >= 2) {
@@ -312,8 +337,14 @@ export default function NuevaVentaPage() {
       const totales = calcularTotales();
       const fechaActual = new Date().toISOString().split('T')[0];
 
+      if (!numeroFactura.trim()) {
+        alert('Por favor ingresa un número de factura');
+        return;
+      }
+
       const ventaData = {
         clienteId: clienteSeleccionado,
+        numeroFactura: numeroFactura.trim(),
         tipoDocumento: 'FACTURA DE VENTA',
         condicion: tipoVenta === 'contado' ? 'CONTADO' : 'CREDITO',
         fecha: fechaActual,
@@ -610,6 +641,33 @@ export default function NuevaVentaPage() {
 
                 <div>
                   <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    Número de Factura <span className="text-red-500">*</span>
+                  </label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={numeroFactura}
+                      onChange={(e) => setNumeroFactura(e.target.value)}
+                      className="flex-1 px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                      placeholder="001-001-0000001"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={generarNumeroFactura}
+                      className="px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-lg text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors whitespace-nowrap"
+                      title="Generar siguiente número"
+                    >
+                      Auto
+                    </button>
+                  </div>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Formato: XXX-XXX-XXXXXXX (ej: 001-001-0000001)
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Timbrado
                   </label>
                   <input
@@ -617,7 +675,11 @@ export default function NuevaVentaPage() {
                     value={timbrado}
                     onChange={(e) => setTimbrado(e.target.value)}
                     className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    placeholder="Número de timbrado fiscal"
                   />
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                    Número de timbrado fiscal (diferente del número de factura)
+                  </p>
                 </div>
 
                 <div>
