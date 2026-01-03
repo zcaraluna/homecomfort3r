@@ -51,6 +51,11 @@ import HorizontaLDots from "./horizontal-dots.svg";
 import ChatIcon from "./chat.svg";
 import MoreDotIcon from "./more-dot.svg";
 import BellIcon from "./bell.svg";
+import ShoppingCartIcon from "./shopping-cart.svg";
+import ReceiptIcon from "./receipt.svg";
+import WarehouseIcon from "./warehouse.svg";
+import ChartBarIcon from "./chart-bar.svg";
+import SettingsIcon from "./settings.svg";
 
 export {
   DownloadIcon,
@@ -106,4 +111,9 @@ export {
   HorizontaLDots,
   ChevronUpIcon,
   ChatIcon,
+  ShoppingCartIcon,
+  ReceiptIcon,
+  WarehouseIcon,
+  ChartBarIcon,
+  SettingsIcon,
 };

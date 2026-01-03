@@ -49,12 +49,22 @@ model Cliente {
   googleId          String?     @unique @map("google_id") // Para autenticación con Google
   activo            Boolean     @default(true)
   
+  // Campos del sistema anterior (para migración)
+  codigoCliente     Int?        @unique @map("codigo_cliente") // CODIGO_CLIENTE del sistema anterior
+  idInterno         Int?        @unique @map("id_interno") // ID del sistema anterior
+  nombreComercial   String?     @map("nombre_comercial") // NOMBRE_COMPERCIAL
+  ruc               String?     // RUC del cliente
+  listaPrecioId     String?     @map("lista_precio_id") // LISTAPRECIO
+  listaPrecio       ListaPrecio? @relation(fields: [listaPrecioId], references: [id])
+  condicion         String?     @default("CONTADO") // CONDICION (CONTADO/CREDITO)
+  
   // Relaciones
   carrito           CarritoItem[]
   pedidos           Pedido[]    @relation("PedidosCliente")
   listasRegalo      ListaRegalo[]
   seleccionSucursal Sucursal?   @relation("ClienteSucursal", fields: [sucursalId], references: [id])
   sucursalId        String?     @map("sucursal_id")
+  ventas            Venta[]
   
   // Timestamps
   createdAt         DateTime    @default(now()) @map("created_at")
@@ -81,6 +91,7 @@ model Sucursal {
   clientes        Cliente[]   @relation("ClienteSucursal")
   productos       Producto[]
   pedidos         Pedido[]
+  existencias     Existencia[]
   
   // Timestamps
   createdAt       DateTime    @default(now()) @map("created_at")
@@ -142,6 +153,14 @@ model Producto {
   imagenes        String[]    // Array de URLs de imágenes adicionales
   activo          Boolean     @default(true)
   
+  // Campos del sistema anterior (para migración)
+  codigoProducto  Int?        @unique @map("codigo_producto") // COD_PRODUCTO del sistema anterior
+  codigoBarras    String?     @unique @map("codigo_barras") // CODIGO_PRODUCTO (código de barras/SKU)
+  rubro           String?     // RUBRO (categoría principal)
+  familia         String?     // FAMILIA (subcategoría)
+  proveedorDfl    String?     @map("proveedor_dfl") // PROVEEDOR_DFL (denormalizado)
+  stockNegativo   Boolean     @default(false) @map("stock_negativo") // STOCK_NEGATIVO (S/N)
+  
   // Relaciones
   categoriaId     String      @map("categoria_id")
   categoria       Categoria   @relation(fields: [categoriaId], references: [id])
@@ -154,6 +173,13 @@ model Producto {
   carritoItems    CarritoItem[]
   pedidoItems     PedidoItem[]
   listaRegaloItems ListaRegaloItem[]
+  
+  // Relaciones con compras
+  compraProductos CompraProducto[]
+  
+  // Relaciones con ventas
+  existencias     Existencia[]
+  ventaItems     VentaItem[]
   
   // Timestamps
   createdAt       DateTime    @default(now()) @map("created_at")
@@ -283,4 +309,325 @@ enum MetodoPago {
   TRANSFERENCIA_BANCARIA
   PAGO_CONTRA_ENTREGA
   QR_BANCARD
+}
+
+// ============================================
+// SISTEMA DE COMPRAS Y PROVEEDORES
+// ============================================
+
+// Tabla de Proveedores
+model Proveedor {
+  id                String      @id @default(uuid())
+  codigoProveedor   Int         @unique @map("codigo_proveedor") // CODIGO_PROVEEDOR del sistema anterior
+  idInterno         Int?        @unique @map("id_interno") // ID_INTERNO del sistema anterior (para migración)
+  nombre            String
+  nombreComercial   String      @map("nombre_comercial")
+  ruc               String      @unique // RUC_PROVEEDOR (formato: 80009246-5)
+  ci                String?     // Cédula de identidad (opcional, raro)
+  direccion         String?
+  correo            String?
+  web               String?
+  telefono          String?
+  activo            Boolean     @default(true)
+  
+  // Relaciones
+  compras           Compra[]
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("proveedores")
+}
+
+// Tabla de Monedas (Catálogo)
+model Moneda {
+  id                String      @id @default(uuid())
+  codigo            String      @unique // Ej: "PYG", "USD"
+  nombre            String      @unique // Ej: "Guaraníes", "Dólares"
+  simbolo           String      // Ej: "₲", "$"
+  activa            Boolean     @default(true)
+  
+  // Relaciones
+  compras           Compra[]
+  ventas            Venta[]
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("monedas")
+}
+
+// Tabla de Depósitos/Almacenes (Catálogo)
+model Deposito {
+  id                String      @id @default(uuid())
+  nombre            String      @unique // Ej: "CASA CENTRAL"
+  descripcion       String?
+  activo            Boolean     @default(true)
+  
+  // Relaciones
+  compraProductos   CompraProducto[]
+  compraGastos      CompraGasto[]
+  existencias       Existencia[]
+  ventaItems        VentaItem[]
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("depositos")
+}
+
+// Tabla de Tipos de Gasto (Catálogo)
+model TipoGasto {
+  id                String      @id @default(uuid())
+  codigo            Int         @unique // COD_GASTO del sistema anterior
+  nombre            String      @unique // Ej: "Servicios Informáticos", "Combustible"
+  descripcion       String?
+  activo            Boolean     @default(true)
+  
+  // Relaciones
+  compraGastos      CompraGasto[]
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("tipos_gasto")
+}
+
+// Tabla de Compras (Facturas de Compra)
+model Compra {
+  id                    String      @id @default(uuid())
+  idCompraCab           Int?        @unique @map("id_compra_cab") // ID_COMPRACAB del sistema anterior (para migración)
+  tipoDocumento         String      @default("FACTURA") @map("tipo_documento")
+  timbrado              String      // TIMBRADO_COMPRA
+  timbradoVencimiento   DateTime?   @map("timbrado_vencimiento") // TIMBRADO_VENCIMIENTO
+  comprobanteProveedor  String      @map("comprobante_proveedor") // COMPROBANTE_PROV
+  fechaCompra           DateTime    @map("fecha_compra")
+  fechaVencimiento      DateTime?   @map("fecha_vencimiento") // VENCIMIENTO
+  
+  // Relación con Proveedor
+  proveedorId           String      @map("proveedor_id")
+  proveedor             Proveedor  @relation(fields: [proveedorId], references: [id])
+  
+  // Datos denormalizados (para historial y consultas rápidas)
+  nombreProveedor       String?     @map("nombre_proveedor") // NOMBRE_PROVEEDOR (denormalizado)
+  rucProveedor          String?     @map("ruc_proveedor") // RUC_PROVEEDOR (denormalizado)
+  
+  // Relación con Moneda
+  monedaId              String      @map("moneda_id")
+  moneda                Moneda      @relation(fields: [monedaId], references: [id])
+  cotizacion            Decimal     @default(1.00) @db.Decimal(10, 4) // COTIZACION_COMPRA
+  
+  // Impuestos
+  porcentajeImpuesto    Decimal     @default(10.00) @map("porcentaje_impuesto") @db.Decimal(5, 2) // PORCENTAJE_IMPUESTO
+  exenta                Decimal     @default(0) @db.Decimal(12, 2) // EXENTA
+  gravada05             Decimal     @default(0) @db.Decimal(12, 2) // GRAVADA_05
+  gravada10             Decimal     @default(0) @db.Decimal(12, 2) // GRAVADA_10
+  iva05                 Decimal     @default(0) @db.Decimal(12, 2) // IVA_05
+  iva10                 Decimal     @default(0) @db.Decimal(12, 2) // IVA_10
+  iva                   Decimal     @default(0) @db.Decimal(12, 2) // IVA total
+  
+  // Montos
+  montoCompra           Decimal     @map("monto_compra") @db.Decimal(12, 2) // MONTO_COMPRA
+  saldoCompra           Decimal     @default(0) @map("saldo_compra") @db.Decimal(12, 2) // SALDO_COMPRA
+  
+  // Relaciones
+  productos             CompraProducto[]
+  gastos                CompraGasto[]
+  
+  // Timestamps
+  createdAt             DateTime    @default(now()) @map("created_at")
+  updatedAt             DateTime    @updatedAt @map("updated_at")
+
+  @@map("compras")
+}
+
+// Tabla de Detalles de Productos Comprados
+model CompraProducto {
+  id                String      @id @default(uuid())
+  
+  // Relación con Compra
+  compraId          String      @map("compra_id")
+  compra            Compra      @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  
+  // Relación con Producto (opcional, puede no existir en el catálogo)
+  productoId       String?      @map("producto_id")
+  producto         Producto?    @relation(fields: [productoId], references: [id])
+  
+  // Datos del sistema anterior
+  codigoProducto   Int?         @map("codigo_producto") // COD_PRODUCTO del sistema anterior
+  nombreProducto   String       @map("nombre_producto") // PRODUCTO (denormalizado)
+  tipoDetalle      String       @default("MERCADERIA") @map("tipo_detalle") // TIPO_DETALLE
+  
+  // Relación con Depósito
+  depositoId       String       @map("deposito_id")
+  deposito         Deposito     @relation(fields: [depositoId], references: [id])
+  
+  // Impuestos y montos
+  iva              Decimal      @default(10.00) @db.Decimal(5, 2) // IVA
+  cantidad         Decimal      @db.Decimal(10, 3) // CANTIDAD
+  precioUnitario   Decimal      @map("precio_unitario") @db.Decimal(12, 2) // UNITARIO
+  total            Decimal       @db.Decimal(12, 2) // TOTAL
+  
+  // Timestamps
+  createdAt        DateTime     @default(now()) @map("created_at")
+  updatedAt        DateTime     @updatedAt @map("updated_at")
+
+  @@map("compra_productos")
+}
+
+// Tabla de Detalles de Gastos en Compras
+model CompraGasto {
+  id                String      @id @default(uuid())
+  
+  // Relación con Compra
+  compraId          String      @map("compra_id")
+  compra            Compra      @relation(fields: [compraId], references: [id], onDelete: Cascade)
+  
+  // Relación con Tipo de Gasto
+  tipoGastoId       String      @map("tipo_gasto_id")
+  tipoGasto         TipoGasto   @relation(fields: [tipoGastoId], references: [id])
+  
+  // Datos del sistema anterior
+  codigoGasto       Int?        @map("codigo_gasto") // COD_GASTO del sistema anterior
+  nombreGasto       String?     @map("nombre_gasto") // TIPOGASTO (denormalizado)
+  tipoDetalle       String      @default("GASTO") @map("tipo_detalle") // TIPO_DETALLE
+  
+  // Relación con Depósito
+  depositoId        String      @map("deposito_id")
+  deposito          Deposito    @relation(fields: [depositoId], references: [id])
+  
+  // Impuestos y montos
+  iva               Decimal     @default(0.00) @db.Decimal(5, 2) // IVA
+  cantidad          Decimal     @default(1.000) @db.Decimal(10, 3) // CANTIDAD
+  precioUnitario    Decimal     @map("precio_unitario") @db.Decimal(12, 2) // UNITARIO
+  total             Decimal     @db.Decimal(12, 2) // TOTAL
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+
+  @@map("compra_gastos")
+}
+
+// ============================================
+// SISTEMA DE VENTAS
+// ============================================
+
+// Tabla de Listas de Precio (Catálogo)
+model ListaPrecio {
+  id                String      @id @default(uuid())
+  codigo            Int         @unique // Código de la lista de precios
+  nombre            String      @unique
+  descripcion       String?
+  activa            Boolean     @default(true)
+  
+  // Relaciones
+  clientes          Cliente[]
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("listas_precio")
+}
+
+// Tabla de Existencias (Stock por producto, sucursal y depósito)
+model Existencia {
+  id                String      @id @default(uuid())
+  cantidad          Decimal     @default(0) @db.Decimal(10, 3)
+  
+  // Relaciones
+  productoId       String      @map("producto_id")
+  producto         Producto    @relation(fields: [productoId], references: [id], onDelete: Cascade)
+  sucursalId       String      @map("sucursal_id")
+  sucursal         Sucursal    @relation(fields: [sucursalId], references: [id])
+  depositoId       String      @map("deposito_id")
+  deposito         Deposito    @relation(fields: [depositoId], references: [id])
+  
+  // Timestamps
+  createdAt        DateTime    @default(now()) @map("created_at")
+  updatedAt        DateTime    @updatedAt @map("updated_at")
+
+  @@unique([productoId, sucursalId, depositoId])
+  @@map("existencias")
+}
+
+// Tabla de Ventas (Facturas de Venta)
+model Venta {
+  id                    String      @id @default(uuid())
+  numeroFactura        String      @unique @map("numero_factura") // FACTURA (formato: 002-002-0000016)
+  tipoDocumento        String      @default("FACTURA DE VENTA") @map("tipo_documento") // DOCUMENTO
+  condicion            String      @default("CREDITO") // CONDICION
+  fecha                DateTime    // FECHA
+  timbrado             String      // TIMBRADO
+  timbradoVencimiento  DateTime?   @map("timbrado_vencimiento") // VENCIMIENTO_TIMBRADO
+  
+  // Relación con Cliente
+  clienteId            String      @map("cliente_id")
+  cliente              Cliente     @relation(fields: [clienteId], references: [id])
+  
+  // Datos denormalizados (para historial)
+  nombreCliente        String?     @map("nombre_cliente") // NOMBRE (denormalizado)
+  
+  // Relación con Moneda
+  monedaId             String      @map("moneda_id")
+  moneda               Moneda      @relation(fields: [monedaId], references: [id])
+  
+  // Impuestos
+  gravada10            Decimal     @default(0) @db.Decimal(12, 2) // GRAVADA_10
+  iva10                Decimal     @default(0) @db.Decimal(12, 2) // IVA_10
+  gravada05            Decimal     @default(0) @db.Decimal(12, 2) // GRAVADA_05
+  iva05                Decimal     @default(0) @db.Decimal(12, 2) // IVA_05
+  exenta               Decimal     @default(0) @db.Decimal(12, 2) // EXENTA
+  
+  // Montos
+  montoVenta           Decimal     @map("monto_venta") @db.Decimal(12, 2) // MONTO_VENTA
+  saldoVenta           Decimal     @default(0) @map("saldo_venta") @db.Decimal(12, 2) // SALDO_VENTA
+  fechaVencimiento     DateTime?   @map("fecha_vencimiento") // FECHA_VENCIMEITNO (nota: typo en original)
+  
+  // Relaciones
+  items                VentaItem[]
+  
+  // Timestamps
+  createdAt            DateTime    @default(now()) @map("created_at")
+  updatedAt            DateTime    @updatedAt @map("updated_at")
+
+  @@map("ventas")
+}
+
+// Tabla de Items de Venta (Detalle de productos vendidos)
+model VentaItem {
+  id                String      @id @default(uuid())
+  
+  // Relación con Venta
+  ventaId           String      @map("venta_id")
+  venta             Venta       @relation(fields: [ventaId], references: [id], onDelete: Cascade)
+  
+  // Relación con Producto
+  productoId        String      @map("producto_id")
+  producto          Producto    @relation(fields: [productoId], references: [id])
+  
+  // Datos del sistema anterior
+  codigoProducto    Int?        @map("codigo_producto") // COD_PRODUCTO del sistema anterior
+  nombreProducto    String?     @map("nombre_producto") // NOMBRE_PRODUCTO (denormalizado)
+  
+  // Relación con Depósito
+  depositoId        String      @map("deposito_id")
+  deposito          Deposito    @relation(fields: [depositoId], references: [id])
+  
+  // Cantidades y montos
+  cantidad          Decimal     @db.Decimal(10, 3) // CANTIDAD
+  iva               Decimal     @default(0.00) @db.Decimal(5, 2) // IVA
+  precioUnitario    Decimal     @map("precio_unitario") @db.Decimal(12, 2) // UNITARIO
+  montoTotal        Decimal     @map("monto_total") @db.Decimal(12, 2) // MONTOTOTAL
+  
+  // Timestamps
+  createdAt         DateTime    @default(now()) @map("created_at")
+  updatedAt         DateTime    @updatedAt @map("updated_at")
+
+  @@map("venta_items")
 }

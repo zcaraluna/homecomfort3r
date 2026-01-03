@@ -11,13 +11,20 @@ import {
   HorizontaLDots,
   UserCircleIcon,
   GroupIcon,
+  BoxIcon,
+  ShoppingCartIcon,
+  ReceiptIcon,
+  WarehouseIcon,
+  ChartBarIcon,
+  SettingsIcon,
+  DollarLineIcon,
 } from "../icons/index";
 
 type NavItem = {
   name: string;
   icon: React.ReactNode;
   path?: string;
-  subItems?: { name: string; path: string; pro?: boolean; new?: boolean }[];
+  subItems?: { name: string; path: string; pro?: boolean; new?: boolean; requiredRole?: Rol }[];
   requiredRole?: Rol;
 };
 
@@ -33,10 +40,51 @@ const baseNavItems: NavItem[] = [
     path: "/profile",
   },
   {
-    icon: <GroupIcon />,
-    name: "Usuarios",
-    path: "/usuarios",
-    requiredRole: Rol.ADMIN,
+    icon: <BoxIcon />,
+    name: "Inventario",
+    subItems: [
+      { name: "Productos", path: "/productos" },
+      { name: "Existencias", path: "/existencias" },
+    ],
+  },
+  {
+    icon: <ShoppingCartIcon />,
+    name: "Compras",
+    subItems: [
+      { name: "Compras", path: "/compras" },
+      { name: "Nueva Compra", path: "/compras/nueva" },
+      { name: "Proveedores", path: "/proveedores" },
+    ],
+  },
+  {
+    icon: <ReceiptIcon />,
+    name: "Ventas",
+    subItems: [
+      { name: "Ventas", path: "/ventas" },
+      { name: "Nueva Venta", path: "/ventas/nueva" },
+      { name: "Clientes", path: "/clientes" },
+    ],
+  },
+  {
+    icon: <ChartBarIcon />,
+    name: "Reportes",
+    subItems: [
+      { name: "Dashboard Ventas", path: "/reportes/ventas" },
+      { name: "Dashboard Compras", path: "/reportes/compras" },
+      { name: "Estado de Cuentas", path: "/reportes/cuentas" },
+      { name: "Inventario Valorado", path: "/reportes/inventario" },
+    ],
+  },
+  {
+    icon: <SettingsIcon />,
+    name: "Configuración",
+    subItems: [
+      { name: "Usuarios", path: "/usuarios", requiredRole: Rol.ADMIN },
+      { name: "Sucursales", path: "/configuracion/sucursales" },
+      { name: "Monedas", path: "/configuracion/monedas" },
+      { name: "Depósitos", path: "/configuracion/depositos" },
+      { name: "Listas de Precio", path: "/configuracion/listas-precio" },
+    ],
   },
 ];
 
@@ -46,10 +94,29 @@ const AppSidebar: React.FC = () => {
   const pathname = usePathname();
 
   // Filtrar items según el rol del usuario
-  const navItems = baseNavItems.filter((item) => {
-    if (!item.requiredRole) return true;
-    return user?.rol === item.requiredRole;
-  });
+  const navItems = baseNavItems
+    .filter((item) => {
+      if (!item.requiredRole) return true;
+      return user?.rol === item.requiredRole;
+    })
+    .map((item) => {
+      // Filtrar subItems según el rol
+      if (item.subItems) {
+        return {
+          ...item,
+          subItems: item.subItems.filter((subItem) => {
+            if (!subItem.requiredRole) return true;
+            return user?.rol === subItem.requiredRole;
+          }),
+        };
+      }
+      return item;
+    })
+    .filter((item) => {
+      // Si un item tiene subItems pero todos fueron filtrados, ocultar el item
+      if (item.subItems && item.subItems.length === 0) return false;
+      return true;
+    });
 
   const renderMenuItems = (navItems: NavItem[]) => (
     <ul className="flex flex-col gap-4">
