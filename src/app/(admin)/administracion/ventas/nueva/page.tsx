@@ -562,10 +562,11 @@ export default function NuevaVentaPage() {
                   <select
                     value={tipoVenta}
                     onChange={(e) => setTipoVenta(e.target.value as 'contado' | 'cuotas')}
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent"
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg bg-white dark:bg-gray-800 text-gray-900 dark:text-white focus:ring-2 focus:ring-brand-500 focus:border-transparent font-outfit"
+                    style={{ fontFamily: 'Inter, sans-serif' }}
                   >
-                    <option value="contado">Contado</option>
-                    <option value="cuotas">A Cuotas</option>
+                    <option value="contado" style={{ fontFamily: 'Inter, sans-serif' }}>Contado</option>
+                    <option value="cuotas" style={{ fontFamily: 'Inter, sans-serif' }}>A Cuotas</option>
                   </select>
                 </div>
 
