@@ -140,6 +140,11 @@ async function fixDates() {
     });
 
     for (const compra of todasCompras) {
+      if (!compra.idCompraCab) {
+        comprasNoEncontradas++;
+        continue;
+      }
+      
       const fechaCorrecta = comprasFechasMap.get(compra.idCompraCab);
       
       if (fechaCorrecta) {
