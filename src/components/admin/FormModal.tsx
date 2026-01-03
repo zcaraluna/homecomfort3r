@@ -1,6 +1,6 @@
 'use client';
 
-import React, { ReactNode } from 'react';
+import React, { ReactNode, useEffect } from 'react';
 import { CloseIcon } from '@/icons';
 
 interface FormModalProps {
@@ -20,6 +20,20 @@ export default function FormModal({
   size = 'md',
   footer,
 }: FormModalProps) {
+  // Prevenir scroll del body cuando el modal está abierto
+  useEffect(() => {
+    if (isOpen) {
+      // Guardar el valor actual del overflow
+      const originalStyle = window.getComputedStyle(document.body).overflow;
+      // Deshabilitar scroll
+      document.body.style.overflow = 'hidden';
+      // Restaurar cuando el componente se desmonte o el modal se cierre
+      return () => {
+        document.body.style.overflow = originalStyle;
+      };
+    }
+  }, [isOpen]);
+
   if (!isOpen) return null;
 
   const sizeClasses = {
@@ -30,17 +44,18 @@ export default function FormModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto">
+    <div className="fixed inset-0 overflow-y-auto" style={{ zIndex: 999999 }}>
       {/* Backdrop */}
       <div
-        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+        className="fixed inset-0 bg-black bg-opacity-50 transition-opacity backdrop-blur-sm"
         onClick={onClose}
+        style={{ zIndex: 999998 }}
       />
 
       {/* Modal */}
-      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="relative flex min-h-full items-center justify-center p-4" style={{ zIndex: 999999 }}>
         <div
-          className={`relative w-full ${sizeClasses[size]} bg-white dark:bg-gray-900 rounded-2xl shadow-xl transform transition-all`}
+          className={`relative w-full ${sizeClasses[size]} bg-white dark:bg-gray-900 rounded-2xl shadow-2xl transform transition-all`}
           onClick={(e) => e.stopPropagation()}
         >
           {/* Header */}
