@@ -13,6 +13,18 @@ const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
+// Función para convertir número de Excel (días desde 1900) a Date
+function excelDateToDate(excelDate: number): Date {
+  // Excel cuenta desde el 1 de enero de 1900
+  // Pero Excel tiene un bug: piensa que 1900 fue año bisiesto
+  // Por eso restamos 2 días en lugar de 1
+  const excelEpoch = new Date(1899, 11, 30); // 30 de diciembre de 1899
+  const days = excelDate - 1; // Excel cuenta desde 1, no desde 0
+  const date = new Date(excelEpoch);
+  date.setDate(date.getDate() + days);
+  return date;
+}
+
 // Función para convertir fecha DD/MM/YYYY a Date
 function parseDate(dateStr: string | Date | number | null | undefined): Date | null {
   if (!dateStr) return null;
@@ -22,8 +34,14 @@ function parseDate(dateStr: string | Date | number | null | undefined): Date | n
     return isNaN(dateStr.getTime()) ? null : dateStr;
   }
   
-  // Si es un número (timestamp), convertirlo
+  // Si es un número, verificar si es un número de Excel (días desde 1900)
+  // Los números de Excel suelen ser > 1 y < 100000
   if (typeof dateStr === 'number') {
+    // Si el número es pequeño (< 100000), probablemente es días de Excel
+    if (dateStr > 1 && dateStr < 100000) {
+      return excelDateToDate(dateStr);
+    }
+    // Si es un timestamp grande, tratarlo como milisegundos
     const date = new Date(dateStr);
     return isNaN(date.getTime()) ? null : date;
   }

@@ -21,6 +21,8 @@
     "db:studio": "prisma studio",
     "db:migrate-data": "tsx prisma/migrate-data.ts",
     "db:update-temporales": "tsx prisma/update-clientes-temporales.ts",
+    "db:check-dates": "tsx prisma/check-dates.ts",
+    "db:fix-dates": "tsx prisma/fix-dates.ts",
     "analyze:migration": "tsx scripts/analizar-migracion.ts"
   },
   "dependencies": {

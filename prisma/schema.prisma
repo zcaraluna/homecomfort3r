@@ -589,6 +589,13 @@ model Venta {
   saldoVenta           Decimal     @default(0) @map("saldo_venta") @db.Decimal(12, 2) // SALDO_VENTA
   fechaVencimiento     DateTime?   @map("fecha_vencimiento") // FECHA_VENCIMEITNO (nota: typo en original)
   
+  // Campos para ventas a cuotas
+  numeroCuotas         Int?        @map("numero_cuotas") // Número de cuotas (null si es contado)
+  porcentajeRecargoPorCuota Decimal? @map("porcentaje_recargo_por_cuota") @db.Decimal(5, 2) // Porcentaje de recargo por cuota (ej: 2.00)
+  montoRecargo         Decimal?     @map("monto_recargo") @db.Decimal(12, 2) // Monto total del recargo
+  montoConRecargo      Decimal?     @map("monto_con_recargo") @db.Decimal(12, 2) // Monto total con recargo aplicado
+  valorCuota           Decimal?     @map("valor_cuota") @db.Decimal(12, 2) // Valor de cada cuota mensual
+  
   // Relaciones
   items                VentaItem[]
   
