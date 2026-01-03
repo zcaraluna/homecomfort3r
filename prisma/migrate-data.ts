@@ -461,6 +461,10 @@ async function main() {
       if (!idCompraCab) continue;
 
       const codigoProveedor = parseIntSafe(row.COD_PROVEEDOR);
+      if (!codigoProveedor) {
+        console.log(`⚠️  Código de proveedor inválido para compra ${idCompraCab}`);
+        continue;
+      }
       const proveedorId = proveedoresMap.get(codigoProveedor);
       if (!proveedorId) {
         console.log(`⚠️  Proveedor ${codigoProveedor} no encontrado para compra ${idCompraCab}`);
@@ -527,11 +531,12 @@ async function main() {
     let compraProductosCount = 0;
     for (const row of compraProductosData as any[]) {
       const idCompraCab = parseIntSafe(row.ID_COMPRACAB);
+      if (!idCompraCab) continue;
       const compraId = comprasMap.get(idCompraCab);
       if (!compraId) continue;
 
       const codigoProducto = parseIntSafe(row.COD_PRODUCTO);
-      const productoId = productosMap.get(codigoProducto) || null;
+      const productoId = codigoProducto ? productosMap.get(codigoProducto) || null : null;
 
       const depositoNombre = cleanString(row.DEPOSITO) || 'CASA CENTRAL';
       const depositoId = depositosMap.get(depositoNombre);
@@ -542,7 +547,7 @@ async function main() {
           compraId,
           productoId,
           codigoProducto,
-          nombreProducto: cleanString(row.PRODUCTO),
+          nombreProducto: cleanString(row.PRODUCTO) || '',
           tipoDetalle: cleanString(row.TIPO_DETALLE) || 'MERCADERIA',
           depositoId,
           iva: parseDecimal(row.IVA),
@@ -565,10 +570,12 @@ async function main() {
     let compraGastosCount = 0;
     for (const row of gastosData as any[]) {
       const idCompraCab = parseIntSafe(row.ID_COMPRACAB);
+      if (!idCompraCab) continue;
       const compraId = comprasMap.get(idCompraCab);
       if (!compraId) continue;
 
       const codigoGasto = parseIntSafe(row.COD_GASTO);
+      if (!codigoGasto) continue;
       const tipoGastoId = tiposGastoMap.get(codigoGasto);
       if (!tipoGastoId) continue;
 
@@ -581,7 +588,7 @@ async function main() {
           compraId,
           tipoGastoId,
           codigoGasto,
-          nombreGasto: cleanString(row.TIPOGASTO),
+          nombreGasto: cleanString(row.TIPOGASTO) || '',
           tipoDetalle: cleanString(row.TIPO_DETALLE) || 'GASTO',
           depositoId,
           iva: parseDecimal(row.IVA),
@@ -611,6 +618,7 @@ async function main() {
       if (!numeroFactura) continue;
 
       const codigoCliente = parseIntSafe(row.COD_CLIENTE);
+      if (!codigoCliente) continue;
       let clienteId = clientesMap.get(codigoCliente);
       
       // Si el cliente no existe, crear uno temporal
@@ -704,10 +712,12 @@ async function main() {
     let ventaItemsCount = 0;
     for (const row of detalleVentasData as any[]) {
       const numeroFactura = cleanString(row.FACTURA);
+      if (!numeroFactura) continue;
       const ventaId = ventasMap.get(numeroFactura);
       if (!ventaId) continue;
 
       const codigoProducto = parseIntSafe(row.COD_PRODUCTO);
+      if (!codigoProducto) continue;
       const productoId = productosMap.get(codigoProducto);
       if (!productoId) {
         console.log(`⚠️  Producto ${codigoProducto} no encontrado para venta ${numeroFactura}`);
@@ -723,7 +733,7 @@ async function main() {
           ventaId,
           productoId,
           codigoProducto,
-          nombreProducto: cleanString(row.NOMBRE_PRODUCTO),
+          nombreProducto: cleanString(row.NOMBRE_PRODUCTO) || '',
           depositoId,
           cantidad: parseDecimal(row.CANTIDAD),
           iva: parseDecimal(row.IVA),
@@ -787,6 +797,7 @@ async function main() {
     let existenciasCount = 0;
     for (const row of existenciasData as any[]) {
       const codigoProducto = parseIntSafe(row.CODIGO_PRODUCTO);
+      if (!codigoProducto) continue;
       const productoId = productosMap.get(codigoProducto);
       if (!productoId) continue;
 

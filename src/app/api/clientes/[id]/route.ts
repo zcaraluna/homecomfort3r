@@ -21,11 +21,12 @@ const clienteUpdateSchema = z.object({
 // GET - Obtener cliente por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const cliente = await prisma.cliente.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         listaPrecio: true,
         seleccionSucursal: true,
@@ -59,15 +60,16 @@ export async function GET(
 // PUT - Actualizar cliente
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const validationResult = clienteUpdateSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { success: false, error: validationResult.error.errors[0].message },
+        { success: false, error: validationResult.error.issues[0].message },
         { status: 400 }
       );
     }
@@ -87,7 +89,7 @@ export async function PUT(
     } else if (data.nombreCompleto) {
       // Si se actualiza y no tiene asterisco, verificar si era temporal
       const clienteActual = await prisma.cliente.findUnique({
-        where: { id: params.id },
+        where: { id },
       });
       
       if (clienteActual?.nombreCompleto.startsWith('* ')) {
@@ -97,7 +99,7 @@ export async function PUT(
     }
 
     const cliente = await prisma.cliente.update({
-      where: { id: params.id },
+      where: { id },
       data,
       include: {
         listaPrecio: true,
@@ -133,11 +135,12 @@ export async function PUT(
 // DELETE - Eliminar cliente (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const cliente = await prisma.cliente.update({
-      where: { id: params.id },
+      where: { id },
       data: { activo: false },
     });
 

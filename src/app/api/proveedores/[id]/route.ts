@@ -18,11 +18,12 @@ const proveedorUpdateSchema = z.object({
 // GET - Obtener proveedor por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const proveedor = await prisma.proveedor.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         compras: {
           take: 10,
@@ -54,21 +55,22 @@ export async function GET(
 // PUT - Actualizar proveedor
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const validationResult = proveedorUpdateSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { success: false, error: validationResult.error.errors[0].message },
+        { success: false, error: validationResult.error.issues[0].message },
         { status: 400 }
       );
     }
 
     const proveedor = await prisma.proveedor.update({
-      where: { id: params.id },
+      where: { id },
       data: validationResult.data,
     });
 
@@ -100,11 +102,12 @@ export async function PUT(
 // DELETE - Eliminar proveedor (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const proveedor = await prisma.proveedor.update({
-      where: { id: params.id },
+      where: { id },
       data: { activo: false },
     });
 

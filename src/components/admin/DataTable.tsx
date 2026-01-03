@@ -7,7 +7,7 @@ export interface Column<T> {
   header: string;
   accessor: keyof T | ((row: T) => React.ReactNode);
   sortable?: boolean;
-  className?: string;
+  className?: string | ((row: T) => string);
 }
 
 interface DataTableProps<T> {
@@ -99,11 +99,12 @@ export default function DataTable<T extends { id: string }>({
     }));
   };
 
-  const getCellValue = (row: T, accessor: keyof T | ((row: T) => React.ReactNode)) => {
+  const getCellValue = (row: T, accessor: keyof T | ((row: T) => React.ReactNode)): React.ReactNode => {
     if (typeof accessor === 'function') {
       return accessor(row);
     }
-    return row[accessor];
+    const value = row[accessor];
+    return value != null ? String(value) : '';
   };
 
   return (
@@ -170,14 +171,19 @@ export default function DataTable<T extends { id: string }>({
                   key={row.id}
                   className="hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors"
                 >
-                  {columns.map((col, index) => (
-                    <td
-                      key={index}
-                      className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white ${col.className || ''}`}
-                    >
-                      {getCellValue(row, col.accessor)}
-                    </td>
-                  ))}
+                  {columns.map((col, index) => {
+                    const cellClassName = typeof col.className === 'function' 
+                      ? col.className(row) 
+                      : col.className || '';
+                    return (
+                      <td
+                        key={index}
+                        className={`px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white ${cellClassName}`}
+                      >
+                        {getCellValue(row, col.accessor)}
+                      </td>
+                    );
+                  })}
                   {(onEdit || onView || onDelete) && (
                     <td className="px-6 py-4 whitespace-nowrap text-sm">
                       <div className="flex items-center gap-2">

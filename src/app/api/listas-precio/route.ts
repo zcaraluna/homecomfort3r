@@ -5,7 +5,7 @@ export async function GET(request: NextRequest) {
   try {
     const listasPrecio = await prisma.listaPrecio.findMany({
       where: {
-        activo: true,
+        activa: true,
       },
       orderBy: {
         nombre: 'asc',

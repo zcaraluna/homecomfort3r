@@ -22,11 +22,12 @@ const productoUpdateSchema = z.object({
 // GET - Obtener producto por ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const producto = await prisma.producto.findUnique({
-      where: { id: params.id },
+      where: { id },
       include: {
         categoria: true,
         marca: true,
@@ -57,15 +58,16 @@ export async function GET(
 // PUT - Actualizar producto
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const body = await request.json();
     const validationResult = productoUpdateSchema.safeParse(body);
 
     if (!validationResult.success) {
       return NextResponse.json(
-        { success: false, error: validationResult.error.errors[0].message },
+        { success: false, error: validationResult.error.issues[0].message },
         { status: 400 }
       );
     }
@@ -76,7 +78,7 @@ export async function PUT(
     if (data.nombre) {
       const baseSlug = data.nombre.toLowerCase().replace(/[^a-z0-9]+/g, '-');
       const productoActual = await prisma.producto.findUnique({
-        where: { id: params.id },
+        where: { id },
       });
       
       if (productoActual) {
@@ -85,7 +87,7 @@ export async function PUT(
         while (await prisma.producto.findFirst({
           where: {
             slug,
-            NOT: { id: params.id },
+            NOT: { id },
           },
         })) {
           slug = `${baseSlug}-${counter}`;
@@ -96,7 +98,7 @@ export async function PUT(
     }
 
     const producto = await prisma.producto.update({
-      where: { id: params.id },
+      where: { id },
       data,
       include: {
         categoria: true,
@@ -127,11 +129,12 @@ export async function PUT(
 // DELETE - Eliminar producto (soft delete)
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    const { id } = await params;
     const producto = await prisma.producto.update({
-      where: { id: params.id },
+      where: { id },
       data: { activo: false },
     });
 
