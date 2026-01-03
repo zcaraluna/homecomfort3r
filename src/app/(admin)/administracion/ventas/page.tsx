@@ -6,35 +6,35 @@ import { useRouter } from 'next/navigation';
 import { PlusIcon } from '@/icons';
 import StatusBadge from '@/components/admin/StatusBadge';
 
-interface Compra {
+interface Venta {
   id: string;
-  comprobanteProveedor: string;
-  fechaCompra: string;
-  montoCompra: number;
-  saldoCompra: number;
-  proveedor: { nombre: string };
-  nombreProveedor: string | null;
+  numeroFactura: string;
+  fecha: string;
+  montoVenta: number;
+  saldoVenta: number;
+  cliente: { nombreCompleto: string };
+  nombreCliente: string | null;
 }
 
-export default function ComprasPage() {
+export default function VentasPage() {
   const router = useRouter();
-  const [compras, setCompras] = useState<Compra[]>([]);
+  const [ventas, setVentas] = useState<Venta[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchCompras();
+    fetchVentas();
   }, []);
 
-  const fetchCompras = async () => {
+  const fetchVentas = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/compras?limit=1000');
+      const response = await fetch('/api/ventas?limit=1000');
       const result = await response.json();
       if (result.success) {
-        setCompras(result.data);
+        setVentas(result.data);
       }
     } catch (error) {
-      console.error('Error fetching compras:', error);
+      console.error('Error fetching ventas:', error);
     } finally {
       setLoading(false);
     }
@@ -48,28 +48,28 @@ export default function ComprasPage() {
     }).format(value);
   };
 
-  const columns: Column<Compra>[] = [
+  const columns: Column<Venta>[] = [
     {
-      header: 'Comprobante',
-      accessor: 'comprobanteProveedor',
+      header: 'Factura',
+      accessor: 'numeroFactura',
     },
     {
-      header: 'Proveedor',
-      accessor: (row) => row.proveedor?.nombre || row.nombreProveedor || '-',
+      header: 'Cliente',
+      accessor: (row) => row.cliente?.nombreCompleto || row.nombreCliente || '-',
     },
     {
       header: 'Fecha',
-      accessor: (row) => new Date(row.fechaCompra).toLocaleDateString('es-PY'),
+      accessor: (row) => new Date(row.fecha).toLocaleDateString('es-PY'),
     },
     {
       header: 'Monto Total',
-      accessor: (row) => formatCurrency(Number(row.montoCompra)),
+      accessor: (row) => formatCurrency(Number(row.montoVenta)),
     },
     {
       header: 'Saldo Pendiente',
       accessor: (row) => (
-        <span className={Number(row.saldoCompra) > 0 ? 'text-orange-600 dark:text-orange-400 font-semibold' : 'text-green-600 dark:text-green-400'}>
-          {formatCurrency(Number(row.saldoCompra))}
+        <span className={Number(row.saldoVenta) > 0 ? 'text-orange-600 dark:text-orange-400 font-semibold' : 'text-green-600 dark:text-green-400'}>
+          {formatCurrency(Number(row.saldoVenta))}
         </span>
       ),
     },
@@ -77,8 +77,8 @@ export default function ComprasPage() {
       header: 'Estado',
       accessor: (row) => (
         <StatusBadge
-          status={Number(row.saldoCompra) > 0 ? 'Pendiente' : 'Pagada'}
-          variant={Number(row.saldoCompra) > 0 ? 'warning' : 'success'}
+          status={Number(row.saldoVenta) > 0 ? 'Pendiente' : 'Cobrada'}
+          variant={Number(row.saldoVenta) > 0 ? 'warning' : 'success'}
         />
       ),
     },
@@ -89,18 +89,18 @@ export default function ComprasPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
-            Compras
+            Ventas
           </h1>
           <p className="text-gray-600 dark:text-gray-400 mt-1">
-            Historial de compras realizadas
+            Historial de ventas realizadas
           </p>
         </div>
         <button
-          onClick={() => router.push('/compras/nueva')}
+          onClick={() => router.push('/administracion/ventas/nueva')}
           className="flex items-center gap-2 px-4 py-2 bg-brand-500 text-white rounded-lg hover:bg-brand-600 transition-colors"
         >
           <PlusIcon className="w-5 h-5" />
-          Nueva Compra
+          Nueva Venta
         </button>
       </div>
 
@@ -108,16 +108,16 @@ export default function ComprasPage() {
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
             <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-r-transparent"></div>
-            <p className="mt-4 text-gray-600 dark:text-gray-400">Cargando compras...</p>
+            <p className="mt-4 text-gray-600 dark:text-gray-400">Cargando ventas...</p>
           </div>
         </div>
       ) : (
         <DataTable
-          data={compras}
+          data={ventas}
           columns={columns}
-          onView={(row) => router.push(`/compras/${row.id}`)}
+          onView={(row) => router.push(`/administracion/ventas/${row.id}`)}
           searchable={true}
-          searchPlaceholder="Buscar por comprobante o proveedor..."
+          searchPlaceholder="Buscar por factura o cliente..."
           pagination={true}
           pageSize={50}
         />

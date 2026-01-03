@@ -16,7 +16,7 @@ interface Cliente {
   ruc: string | null;
   codigoCliente: number | null;
   activo: boolean;
-  listaPrecio: { nombre: string } | null;
+  listaPrecio: { nombre: string; id: string } | null;
 }
 
 export default function ClientesPage() {
@@ -198,7 +198,6 @@ export default function ClientesPage() {
         </button>
       </div>
 
-      {/* Filtros */}
       <div className="flex items-center gap-4">
         <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
           Filtrar:

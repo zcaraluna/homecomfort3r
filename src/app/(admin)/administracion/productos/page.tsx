@@ -18,10 +18,12 @@ interface Producto {
   precioOferta: number | null;
   stock: number;
   activo: boolean;
-  categoria: { nombre: string };
-  marca: { nombre: string };
+  categoria: { nombre: string; id: string };
+  marca: { nombre: string; id: string };
   rubro: string | null;
   familia: string | null;
+  descripcion?: string | null;
+  stockNegativo?: boolean;
 }
 
 export default function ProductosPage() {
@@ -32,7 +34,6 @@ export default function ProductosPage() {
   const [selectedProducto, setSelectedProducto] = useState<Producto | null>(null);
   const [categorias, setCategorias] = useState<{ value: string; label: string }[]>([]);
   const [marcas, setMarcas] = useState<{ value: string; label: string }[]>([]);
-  const [searchTerm, setSearchTerm] = useState('');
 
   useEffect(() => {
     fetchProductos();
@@ -90,7 +91,7 @@ export default function ProductosPage() {
   };
 
   const handleView = (producto: Producto) => {
-    router.push(`/productos/${producto.id}`);
+    router.push(`/administracion/productos/${producto.id}`);
   };
 
   const handleDelete = async (producto: Producto) => {
@@ -141,14 +142,6 @@ export default function ProductosPage() {
     }
   };
 
-  const filteredProductos = productos.filter((p) =>
-    searchTerm
-      ? p.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.codigoBarras?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        p.codigoProducto?.toString().includes(searchTerm)
-      : true
-  );
-
   const columns: Column<Producto>[] = [
     {
       header: 'Código',
@@ -175,7 +168,7 @@ export default function ProductosPage() {
       header: 'Stock',
       accessor: 'stock',
       sortable: true,
-      className: row => row.stock < 10 ? 'text-red-600 dark:text-red-400 font-semibold' : '',
+      className: (row: Producto) => row.stock < 10 ? 'text-red-600 dark:text-red-400 font-semibold' : '',
     },
     {
       header: 'Estado',
@@ -190,7 +183,6 @@ export default function ProductosPage() {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
@@ -209,7 +201,6 @@ export default function ProductosPage() {
         </button>
       </div>
 
-      {/* Tabla */}
       {loading ? (
         <div className="flex items-center justify-center py-12">
           <div className="text-center">
@@ -219,7 +210,7 @@ export default function ProductosPage() {
         </div>
       ) : (
         <DataTable
-          data={filteredProductos}
+          data={productos}
           columns={columns}
           onEdit={handleEdit}
           onView={handleView}
@@ -231,7 +222,6 @@ export default function ProductosPage() {
         />
       )}
 
-      {/* Modal de Crear/Editar */}
       {isModalOpen && (
         <ProductoFormModal
           producto={selectedProducto}
@@ -248,7 +238,6 @@ export default function ProductosPage() {
   );
 }
 
-// Componente del formulario
 function ProductoFormModal({
   producto,
   categorias,

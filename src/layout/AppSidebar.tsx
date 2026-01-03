@@ -43,36 +43,36 @@ const baseNavItems: NavItem[] = [
     icon: <BoxIcon />,
     name: "Inventario",
     subItems: [
-      { name: "Productos", path: "/productos" },
-      { name: "Existencias", path: "/existencias" },
+      { name: "Productos", path: "/administracion/productos" },
+      { name: "Existencias", path: "/administracion/existencias" },
     ],
   },
   {
     icon: <ShoppingCartIcon />,
     name: "Compras",
     subItems: [
-      { name: "Compras", path: "/compras" },
-      { name: "Nueva Compra", path: "/compras/nueva" },
-      { name: "Proveedores", path: "/proveedores" },
+      { name: "Compras", path: "/administracion/compras" },
+      { name: "Nueva Compra", path: "/administracion/compras/nueva" },
+      { name: "Proveedores", path: "/administracion/proveedores" },
     ],
   },
   {
     icon: <ReceiptIcon />,
     name: "Ventas",
     subItems: [
-      { name: "Ventas", path: "/ventas" },
-      { name: "Nueva Venta", path: "/ventas/nueva" },
-      { name: "Clientes", path: "/clientes" },
+      { name: "Ventas", path: "/administracion/ventas" },
+      { name: "Nueva Venta", path: "/administracion/ventas/nueva" },
+      { name: "Clientes", path: "/administracion/clientes" },
     ],
   },
   {
     icon: <ChartBarIcon />,
     name: "Reportes",
     subItems: [
-      { name: "Dashboard Ventas", path: "/reportes/ventas" },
-      { name: "Dashboard Compras", path: "/reportes/compras" },
-      { name: "Estado de Cuentas", path: "/reportes/cuentas" },
-      { name: "Inventario Valorado", path: "/reportes/inventario" },
+      { name: "Dashboard Ventas", path: "/administracion/reportes/ventas" },
+      { name: "Dashboard Compras", path: "/administracion/reportes/compras" },
+      { name: "Estado de Cuentas", path: "/administracion/reportes/cuentas" },
+      { name: "Inventario Valorado", path: "/administracion/reportes/inventario" },
     ],
   },
   {
@@ -80,10 +80,10 @@ const baseNavItems: NavItem[] = [
     name: "Configuración",
     subItems: [
       { name: "Usuarios", path: "/usuarios", requiredRole: Rol.ADMIN },
-      { name: "Sucursales", path: "/configuracion/sucursales" },
-      { name: "Monedas", path: "/configuracion/monedas" },
-      { name: "Depósitos", path: "/configuracion/depositos" },
-      { name: "Listas de Precio", path: "/configuracion/listas-precio" },
+      { name: "Sucursales", path: "/administracion/configuracion/sucursales" },
+      { name: "Monedas", path: "/administracion/configuracion/monedas" },
+      { name: "Depósitos", path: "/administracion/configuracion/depositos" },
+      { name: "Listas de Precio", path: "/administracion/configuracion/listas-precio" },
     ],
   },
 ];
